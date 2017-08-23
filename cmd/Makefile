@@ -5,6 +5,10 @@
 # SPDX-License-Identifier:	GPL-2.0+
 #
 
+# Renesas RZ Commands
+obj-$(CONFIG_CMD_QSPI) += qspi.o
+obj-$(CONFIG_CMD_BOOTX) += bootx.o
+
 ifndef CONFIG_SPL_BUILD
 # core command
 obj-y += boot.o

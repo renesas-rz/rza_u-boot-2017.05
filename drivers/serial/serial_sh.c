@@ -63,6 +63,9 @@ static void sh_serial_init_generic(struct uart_port *port)
 	sci_out(port, SCFCR, SCFCR_RFRST|SCFCR_TFRST);
 	sci_in(port, SCFCR);
 	sci_out(port, SCFCR, 0);
+#ifdef CONFIG_CPU_RZA1
+	sci_out(port, SCSPTR, 0x0053);
+#endif
 }
 
 static void

@@ -4,6 +4,11 @@
 
 menu "I2C support"
 
+config RZA_RIIC
+	bool "Renesas RZ/A RIIC Driver"
+	help
+	  Say yes here to Enable the RIIC driver for RZ/A
+
 config DM_I2C
 	bool "Enable Driver Model for I2C drivers"
 	depends on DM

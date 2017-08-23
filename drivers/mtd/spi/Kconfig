@@ -128,6 +128,14 @@ config SPI_FLASH_MTD
 
 	  If unsure, say N
 
+config SPI_SHOW_PROGRESS
+	bool "Show progress while programming"
+	depends on SPI_FLASH
+	help
+          While erasing and programming, show the status of the operation.
+
+	  If unsure, say N
+
 if SPL
 
 config SPL_SPI_SUNXI

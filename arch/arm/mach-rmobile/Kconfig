@@ -12,9 +12,14 @@ config RCAR_GEN3
 	bool "Renesas ARM SoCs R-Car Gen3 (64bit)"
 	select ARM64
 
+config RZA1
+	prompt "Renesas ARM SoCs RZ/A1"
+	select CPU_V7
+
 endchoice
 
 source "arch/arm/mach-rmobile/Kconfig.32"
 source "arch/arm/mach-rmobile/Kconfig.64"
+source "arch/arm/mach-rmobile/Kconfig.rza1"
 
 endif

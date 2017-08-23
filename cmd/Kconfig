@@ -30,6 +30,19 @@ config SYS_PROMPT
 	  This string is displayed in the command line to the left of the
 	  cursor.
 
+config CMD_QSPI
+	bool "RZ/A qspi command"
+	default y
+	help
+	  The qspi command is used to enable configure the XIP interface
+	  to QSPI Flash devices.
+
+config CMD_BOOTX
+	bool "RZ/A bootx command"
+	default y
+	help
+	  The bootx command is used to boot an XIP kernel.
+
 menu "Autoboot options"
 
 config AUTOBOOT

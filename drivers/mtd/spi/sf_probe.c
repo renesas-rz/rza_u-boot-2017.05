@@ -17,6 +17,8 @@
 
 #include "sf_internal.h"
 
+int qspi_reset_device(struct spi_flash *sf);
+
 /**
  * spi_flash_probe_slave() - Probe for a SPI flash device on a bus
  *
@@ -48,6 +50,10 @@ static int spi_flash_probe_slave(struct spi_flash *flash)
 #ifdef CONFIG_SPI_FLASH_MTD
 	ret = spi_flash_mtd_register(flash);
 #endif
+
+	/* Sometimes we have to do strange things to support devices
+	   in QUAD mode, so we need to reset them back before we continue. */
+	qspi_reset_device(flash);
 
 err_read_id:
 	spi_release_bus(spi);

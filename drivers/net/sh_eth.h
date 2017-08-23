@@ -25,7 +25,9 @@
 #define ADDR_TO_PHY(addr)	((int)(addr) & ~0xe0000000)
 #endif
 #elif defined(CONFIG_ARM)
+#undef inl
 #define inl		readl
+#undef outl
 #define outl	writel
 #define ADDR_TO_PHY(addr)	((int)(addr))
 #define ADDR_TO_P2(addr)	(addr)
@@ -226,7 +228,7 @@ static const u16 sh_eth_offset_gigabit[SH_ETH_MAX_REGISTER_OFFSET] = {
 	[RMII_MII] =  0x0790,
 };
 
-#if defined(SH_ETH_TYPE_RZ)
+// #if defined(SH_ETH_TYPE_RZ)   NOTE: SH_ETH_TYPE_RZ is not defined until later in this file
 static const u16 sh_eth_offset_rz[SH_ETH_MAX_REGISTER_OFFSET] = {
 	[EDSR]	= 0x0000,
 	[EDMR]	= 0x0400,
@@ -279,7 +281,7 @@ static const u16 sh_eth_offset_rz[SH_ETH_MAX_REGISTER_OFFSET] = {
 	[MAFCR]	= 0x0778,
 	[RMII_MII] =  0x0790,
 };
-#endif
+//#endif
 
 static const u16 sh_eth_offset_fast_sh4[SH_ETH_MAX_REGISTER_OFFSET] = {
 	[ECMR]	= 0x0100,

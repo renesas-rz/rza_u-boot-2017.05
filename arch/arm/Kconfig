@@ -1029,6 +1029,8 @@ source "arch/arm/mach-orion5x/Kconfig"
 
 source "arch/arm/mach-rmobile/Kconfig"
 
+#source "arch/arm/cpu/armv7/rza1/Kconfig"
+
 source "arch/arm/mach-meson/Kconfig"
 
 source "arch/arm/mach-rockchip/Kconfig"
