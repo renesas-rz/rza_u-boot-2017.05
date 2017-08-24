@@ -37,6 +37,7 @@
 #define CONFIG_CMDLINE_TAG		/* enable passing of ATAGs */
 #define CONFIG_CMDLINE_EDITING		/* add command line history	*/
 #define __io	/* Support in,out functions on RAM. See arch/arm/include/asm/io.h */
+#define CONFIG_ARCH_CPU_INIT
 
 
 /* Internal RAM Size */
