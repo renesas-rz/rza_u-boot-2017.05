@@ -310,52 +310,57 @@ int board_late_init(void)
 	printf(	"\t\trootfs:  0x%08X 0x%06X 0+1 (size*=2)\n",0x400000, 0x2000000-0x400000);
 #endif
 
-	/* Boot uImage in external SDRAM */
-	/* Rootfs is a squashfs image in memory mapped QSPI */
-	/* => run s_boot */
-	setenv("s1", "sf probe 0; sf read 09800000 C0000 8000"); // Read out DT blob
-	setenv("s2", "sf probe 0:1; sf read 09000000 100000 500000"); //Copy Kernel to SDRAM
-	setenv("s3", "bootm start 0x09000000 - 0x09800000 ; bootm loados ;"\
-			"fdt memory 0x08000000 0x02000000"); // Change memory address in DTB
-	setenv("s4", "qspi dual"); // Change XIP interface to dual QSPI
-	setenv("sargs", "console=ttySC2,115200 console=tty0 ignore_loglevel root=/dev/mtdblock0"); // bootargs
-	setenv("s_boot", "run s1 s2 s3 s4; setenv bootargs ${sargs}; fdt chosen; bootm go"); // run the commands
+	/* Default addresses */
+	#define DTB_ADDR_FLASH		"C0000"		/* Location of Device Tree in QSPI Flash (SPI flash offset) */
+	#define DTB_ADDR_RAM		"20500000"	/* Internal RAM location to copy Device Tree */
+	#define DTB_ADDR_SDRAM		"09800000"	/* External SDRAM location to copy Device Tree */
 
-	/* Boot XIP using internal RAM */
-	/* Rootfs is a squashfs image in memory mapped QSPI */
-	/* => run x_boot */
-	/* Read out DT blob */
-	setenv("x1", "sf probe 0; sf read 20500000 C0000 8000");
-	/* Change memory address in DTB */
-	setenv("x2", "fdt addr 20500000 ; fdt memory 0x20000000 0x00A00000"); /* 10MB RAM */
-	/* Change XIP interface to dual QSPI */
-	setenv("x3", "qspi dual");
-	setenv("xargs", "console=ttySC2,115200 console=tty0 ignore_loglevel root=/dev/mtdblock0"); // bootargs
-	setenv("x_boot", "run x1 x2 x3; setenv bootargs ${xargs}; fdt chosen; bootx 18200000 20500000"); // run the commands
+	#define MEM_ADDR_RAM		"0x20000000 0x00A00000"	/* System Memory for when using on-chip RAM (10MB) */
+	#define MEM_ADDR_SDRAM		"0x08000000 0x02000000"	/* System Memory for when using external SDRAM RAM (32MB) */
 
-	/* Boot XIP using internal RAM */
-	/* Rootfs is a AXFS image in memory mapped QSPI */
+	#define KERNEL_ADDR_FLASH	"0x18200000"	/* Flash location of xipImage or uImage binary */
+	#define UIMAGE_ADDR_SDRAM	"09000000"	/* Address to copy uImage to in external SDRAM */
+	#define UIMAGE_ADDR_SIZE	"0x40000"	/* Size of the uImage binary in Flash (4MB) */
+
+
+	/* Default kernel command line options */
+	setenv("cmdline_common", "ignore_loglevel earlyprintk earlycon=scif,0xE8008000");
+
+	/* Root file system choices */
+	setenv("fs_axfs", "rootfstype=axfs rootflags=physaddr=0x18800000");
+	setenv("fs_mtd",  "root=/dev/mtdblock0");
+
+	/* LCD Frame buffer location */
+	setenv("dtb_lcdfb_fixed", "fdt set /display@fcff7400 fb_phys_addr <0x60000000>");	/* Fixed address */
+	setenv("dtb_lcdfb_dyn",   "fdt set /display@fcff7400 fb_phys_addr <0x00000000>");	/* Dynamically allocate during boot */
+
+	/* Read DTB from Flash into either internal on-chip RAM or external SDRAM */
+	setenv("dtb_read_ram",   "sf probe 0; sf read "DTB_ADDR_RAM" "DTB_ADDR_FLASH" 8000; fdt addr "DTB_ADDR_RAM" ; setenv addr_dtb "DTB_ADDR_RAM"");
+	setenv("dtb_read_sdram", "sf probe 0; sf read "DTB_ADDR_SDRAM" "DTB_ADDR_FLASH" 8000; fdt addr "DTB_ADDR_SDRAM" ; setenv addr_dtb "DTB_ADDR_SDRAM"");
+
+	/* Set the system memory address and size. This overrides the setting in Device Tree */
+	setenv("dtb_mem_ram",   "fdt memory "MEM_ADDR_RAM"");		/* Use internal RAM for system memory */
+	setenv("dtb_mem_sdram", "fdt memory "MEM_ADDR_SDRAM"");		/* Use external SDRAM for system memory */
+
+	/* Kernel booting operations */
+	setenv("xImg", "qspi dual; setenv cmd bootx "KERNEL_ADDR_FLASH" ${addr_dtb}; run cmd");	/* Boot a XIP Kernel */
+	setenv("uImg", "qspi dual; cp.b "KERNEL_ADDR_FLASH" "UIMAGE_ADDR_SDRAM" "UIMAGE_ADDR_SIZE"; bootm start "UIMAGE_ADDR_SDRAM" - "DTB_ADDR_SDRAM"; bootm loados ; bootm go");	/* Boot a uImage kernel */
+
 	/* => run xa_boot */
-	/* Read out DT blob */
-	setenv("xa1", "sf probe 0; sf read 20500000 C0000 8000");
-	/* Change memory address in DTB */
-	setenv("xa2", "fdt addr 20500000 ; fdt memory 0x20000000 0x00A00000"); /* 10MB RAM */
-	/* Change XIP interface to dual QSPI */
-	setenv("xa3", "qspi dual");
-	setenv("xaargs", "console=ttySC2,115200 console=tty0 ignore_loglevel root=/dev/null rootflags=physaddr=0x18800000"); // bootargs
-	setenv("xa_boot", "run xa1 xa2 xa3; setenv bootargs ${xaargs}; fdt chosen; bootx 18200000 20500000"); // run the commands
+	/* Boot XIP using internal RAM only, file system is AXFS, LCD dynamically allocated */
+	setenv("xa_boot", "run dtb_read_ram; run dtb_mem_ram; run dtb_lcdfb_dyn; setenv bootargs ${cmdline_common} ${fs_axfs}; fdt chosen; run xImg");
 
-	/* Boot XIP using external SDRAM RAM */
-	/* Rootfs is a AXFS image in memory mapped QSPI */
 	/* => run xsa_boot */
-	/* Read out DT blob */
-	setenv("xsa1", "sf probe 0; sf read 09800000 C0000 8000");
-	/* Change memory address in DTB */
-	setenv("xsa2", "fdt addr 09800000 ; fdt memory 0x08000000 0x02000000"); /* 32MB SDRAM RAM */
-	/* Change XIP interface to dual QSPI */
-	setenv("xsa3", "qspi dual");
-	setenv("xsaargs", "console=ttySC2,115200 console=tty0 ignore_loglevel root=/dev/null rootflags=physaddr=0x18800000"); // bootargs
-	setenv("xsa_boot", "run xsa1 xsa2 xsa3; setenv bootargs ${xsaargs}; fdt chosen; bootx 18200000 09800000"); // run the commands
+	/* Boot XIP using external 32MB SDRAM, file system is AXFS, LCD FB fixed to internal RAM */
+	setenv("xsa_boot", "run dtb_read_sdram; run dtb_mem_sdram; run dtb_lcdfb_fixed; setenv bootargs ${cmdline_common} ${fs_axfs}; fdt chosen; run xImg");
+
+	/* => run s_boot */
+	/* Boot SDRAM uImage using external 32MB SDRAM, file system is squashfs, LCD FB fixed to internal RAM */
+	setenv("sa_boot", "run dtb_read_sdram; run dtb_mem_sdram; run dtb_lcdfb_fixed; setenv bootargs ${cmdline_common} ${fs_mtd}; fdt chosen; run uImg");
+
+	/* => run sa_boot */
+	/* Boot SDRAM uImage using external 32MB SDRAM, file system is AXFS, LCD FB fixed to internal RAM */
+	setenv("sa_boot", "run dtb_read_sdram; run dtb_mem_sdram; run dtb_lcdfb_fixed; setenv bootargs ${cmdline_common} ${fs_axfs}; fdt chosen; run uImg");
 
 	return 0;
 }
