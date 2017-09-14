@@ -18,6 +18,10 @@ config TARGET_RSKRZA1
 	bool "RZ/A1H RSK board"
 	select BOARD_LATE_INIT
 
+config TARGET_GENMAI
+	bool "GENMAI board"
+	select BOARD_LATE_INIT
+
 # ENTER YOUR CUSTOM BOARD BELOW HERE TO AVOID MERGE CONFLICTS (TAG_TARGET)
 
 endchoice
@@ -27,6 +31,7 @@ config SYS_SOC
 
 # Renesas Supported Boards
 source "board/renesas/rskrza1/Kconfig"
+source "board/renesas/genmai/Kconfig"
 
 # ENTER YOUR CUSTOM BOARD BELOW HERE TO AVOID MERGE CONFLICTS (TAG_KCONFIG)
 
