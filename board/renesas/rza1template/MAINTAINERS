@@ -1,0 +1,6 @@
+RZA1TEMPLATE BOARD
+#M:	-
+S:	Maintained
+F:	board/companyname/rza1template/
+F:	include/configs/rza1template.h
+F:	configs/rza1template_defconfig

@@ -1,5 +1,5 @@
 /*
- * Configuration settings for the Renesas RSKRZA1 board
+ * Configuration settings for the Renesas RZA1TEMPLATE board
  *
  * Copyright (C) 2017 Renesas Electronics
  *
@@ -7,11 +7,11 @@
  * See the file COPYING in the root directory of the source tree for details.
  */
 
-#ifndef __RSKRZA1_H
-#define __RSKRZA1_H
+#ifndef __RZA1TEMPLATE_H
+#define __RZA1TEMPLATE_H
 
-#define CONFIG_ARCH_RMOBILE_BOARD_STRING	"RSKRZA1"
-#define CONFIG_MACH_TYPE			MACH_TYPE_RSKRZA1
+#define CONFIG_ARCH_RMOBILE_BOARD_STRING	"RZA1TEMPLATE"
+#define CONFIG_MACH_TYPE			0xFFFFFFFF /* Boot Linux using Device Tree */
 
 /* Board Clock */
 #define CONFIG_SYS_CLK_FREQ	66666666 /* P1 clock frequency (XTAL=13.33MHz) */
@@ -49,7 +49,7 @@
 #define CONFIG_SYS_SDRAM_SIZE		(10 * 1024 * 1024)
 #define CONFIG_SYS_INIT_SP_ADDR         (CONFIG_SYS_SDRAM_BASE + CONFIG_SYS_SDRAM_SIZE - 1*1024*1024)
 #define _HIDE_CONFIG_SYS_INIT_SP_ADDR         0x20300000 /* Internal RAM @ 3MB */
-#define	_CONFIG_LOADADDR			CONFIG_SYS_SDRAM_BASE	/* default load address */
+#define	_HIDE_CONFIG_LOADADDR			CONFIG_SYS_SDRAM_BASE	/* default load address */
 #define CONFIG_SYS_LOAD_ADDR		(CONFIG_SYS_SDRAM_BASE + 4*1024*1024)
 
 #define CONFIG_NR_DRAM_BANKS		1	/* must be set to 1 */
@@ -126,6 +126,7 @@
 #define CONFIG_SYS_FLASH_CFI_WIDTH	FLASH_CFI_16BIT
 #define CONFIG_SYS_FLASH_BANKS_LIST	{ CONFIG_SYS_FLASH_BASE }
 #define CONFIG_SYS_MONITOR_BASE		CONFIG_SYS_FLASH_BASE
+#define CONFIG_MTD_NOR_FLASH
 
 /* I2C configuration */
 /* Enabled using menuconfig:
@@ -189,4 +190,4 @@
 #define STBCR11_D	0x000000c0
 #define STBCR12_D	0x000000f0
 
-#endif	/* __RSKRZA1_H */
+#endif	/* __RZA1TEMPLATE_H */
