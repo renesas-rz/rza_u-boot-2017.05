@@ -65,9 +65,9 @@ const struct read_mode modes[READ_MODES] = {
 };
 
 /* If you are using a SPI Flash device that does not have 4-byte address
-   commands (Flash size <= 16MB), then change the #if 0 to #if 1 */
-#if 0
- #define ADDRESS_BYTE_SIZE 3	/* Addresses are 3-bytes (A0-A23) */
+   commands (Flash size <= 16MB), then define ADDRESS_BYTE_SIZE to 3 in your board config file */
+#if ADDRESS_BYTE_SIZE == 3
+ //#define ADDRESS_BYTE_SIZE 3	/* Addresses are 3-bytes (A0-A23) */
  #define FAST_READ 0x0B		/* Fast Read Mode (1-bit cmd, 1-bit addr, 1-bit data, 3-bytes of address) */
  #define QUAD_READ 0x6B		/* Quad Read Mode (1-bit cmd, 1-bit addr, 4-bit data, 3-bytes of address) */
  #define QUAD_IO_READ 0xEB	/* Quad I/O Read Mode (1-bit cmd, 4-bit addr, 4-bit data, 3-bytes of address) */
