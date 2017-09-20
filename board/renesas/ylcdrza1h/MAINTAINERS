@@ -1,0 +1,6 @@
+YLCDRZA1H BOARD
+#M:	-
+S:	Maintained
+F:	board/renesas/ylcdrza1h/
+F:	include/configs/ylcdrza1h.h
+F:	configs/ylcdrza1h_defconfig
