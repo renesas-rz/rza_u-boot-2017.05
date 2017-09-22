@@ -1,13 +1,15 @@
 #!/bin/bash
 
-
-# first make sure we are running from inside the directory
-if [ ! -e rza1template.c ] ; then
-  echo "ERROR: you must run this script from inside the rza1tempalte directory"
-  echo "press enter to continue"
+# first make sure we are running from the base directory
+if [ ! -e board/renesas/rza1template/rza1template.c ] ; then
+  echo "ERROR: You must run this script from the base directory."
+  echo "Press enter to continue."
   read dummy
   exit
 fi
+
+#cd board/renesas/rza1template
+
 
 #defaults
 boardname=toaster
@@ -73,7 +75,7 @@ source /tmp/whipcmd.txt
 
     boardname=$(cat /tmp/answer.txt)
 
-    CHECK=`grep $companyname/$boardname ../../../arch/arm/mach-rmobile/Kconfig.rza1`
+    CHECK=`grep $companyname/$boardname arch/arm/mach-rmobile/Kconfig.rza1`
     if [ "$CHECK" != "" ] ; then
       whiptail --msgbox "ERROR:\n      Board Name=$boardname\n    Company Name=$companyname\n\n This combination has already been used. Please choose a different board name." 0 0
     fi
@@ -113,7 +115,7 @@ source /tmp/whipcmd.txt
 
     companyname=$(cat /tmp/answer.txt)
 
-    CHECK=`grep $companyname/$boardname ../../../arch/arm/mach-rmobile/Kconfig.rza1`
+    CHECK=`grep $companyname/$boardname arch/arm/mach-rmobile/Kconfig.rza1`
     if [ "$CHECK" != "" ] ; then
       whiptail --msgbox "ERROR:\n      Board Name=$boardname\n    Company Name=$companyname\n\n This combination has already been used. Please choose a different board name." 0 0
     fi
@@ -318,15 +320,15 @@ done
 
 
 # copy over the files
-mkdir -p ../../${companyname}/${boardname}/
-cp -a Kconfig ../../${companyname}/${boardname}/
-cp -a lowlevel_init.S ../../${companyname}/${boardname}/
-cp -a MAINTAINERS ../../${companyname}/${boardname}/
-cp -a Makefile ../../${companyname}/${boardname}/
-cp -a rza1template.c ../../${companyname}/${boardname}/${boardname}.c
+mkdir -p board/${companyname}/${boardname}/
+cp -a board/renesas/rza1template/Kconfig board/${companyname}/${boardname}/
+cp -a board/renesas/rza1template/lowlevel_init.S board/${companyname}/${boardname}/
+cp -a board/renesas/rza1template/MAINTAINERS board/${companyname}/${boardname}/
+cp -a board/renesas/rza1template/Makefile board/${companyname}/${boardname}/
+cp -a board/renesas/rza1template/rza1template.c board/${companyname}/${boardname}/${boardname}.c
 
-cp -a ../../../configs/rza1template_defconfig ../../../configs/${boardname}_defconfig
-cp -a ../../../include/configs/rza1template.h ../../../include/configs/${boardname}.h
+cp -a configs/rza1template_defconfig configs/${boardname}_defconfig
+cp -a include/configs/rza1template.h include/configs/${boardname}.h
 
 # Convert board name to upper case
 boardnameupper=`echo ${boardname} | tr '[:lower:]' '[:upper:]'`
@@ -337,42 +339,42 @@ boardnameupper=`echo ${boardname} | tr '[:lower:]' '[:upper:]'`
 # companyname >> $companyname
 
 #Kconfig:
-sed -i "s/rza1template/$boardname/g"  ../../${companyname}/${boardname}/Kconfig
-sed -i "s/RZA1TEMPLATE/$boardnameupper/g"  ../../${companyname}/${boardname}/Kconfig
-sed -i "s/companyname/$companyname/g"  ../../${companyname}/${boardname}/Kconfig
+sed -i "s/rza1template/$boardname/g"  board/${companyname}/${boardname}/Kconfig
+sed -i "s/RZA1TEMPLATE/$boardnameupper/g"  board/${companyname}/${boardname}/Kconfig
+sed -i "s/companyname/$companyname/g"  board/${companyname}/${boardname}/Kconfig
 
 
 #lowlevel_init.S
 # (nothing to change)
 
 #MAINTAINERS
-sed -i "s/rza1template/$boardname/g"  ../../${companyname}/${boardname}/MAINTAINERS
-sed -i "s/RZA1TEMPLATE/$boardnameupper/g"  ../../${companyname}/${boardname}/MAINTAINERS
-sed -i "s/companyname/$companyname/g"  ../../${companyname}/${boardname}/MAINTAINERS
+sed -i "s/rza1template/$boardname/g"  board/${companyname}/${boardname}/MAINTAINERS
+sed -i "s/RZA1TEMPLATE/$boardnameupper/g"  board/${companyname}/${boardname}/MAINTAINERS
+sed -i "s/companyname/$companyname/g"  board/${companyname}/${boardname}/MAINTAINERS
 
 #Makefile
-sed -i "s/rza1template/$boardname/g"  ../../${companyname}/${boardname}/Makefile
+sed -i "s/rza1template/$boardname/g"  board/${companyname}/${boardname}/Makefile
 
 #rza1template.c
-sed -i "s/rza1template/$boardname/g"  ../../${companyname}/${boardname}/${boardname}.c
+sed -i "s/rza1template/$boardname/g"  board/${companyname}/${boardname}/${boardname}.c
 
 #rza1template_defconfig
-sed -i "s/RZA1TEMPLATE/$boardnameupper/g"  ../../../configs/${boardname}_defconfig
+sed -i "s/RZA1TEMPLATE/$boardnameupper/g"  configs/${boardname}_defconfig
 
 #rza1template.h
-sed -i "s/RZA1TEMPLATE/$boardnameupper/g"  ../../../include/configs/${boardname}.h
+sed -i "s/RZA1TEMPLATE/$boardnameupper/g"  include/configs/${boardname}.h
 
 #arch/arm/mach-rmobile/Kconfig.rza1
 # (TAG_TARGET)
 #config TARGET_$boardnameupper
 #	bool "$boardname board"
 #	select BOARD_LATE_INIT
-sed -i "s/(TAG_TARGET)/(TAG_TARGET)\nconfig TARGET_$boardnameupper\n\tbool \"$boardname board\"\n\tselect BOARD_LATE_INIT\n/g"  ../../../arch/arm/mach-rmobile/Kconfig.rza1
+sed -i "s/(TAG_TARGET)/(TAG_TARGET)\nconfig TARGET_$boardnameupper\n\tbool \"$boardname board\"\n\tselect BOARD_LATE_INIT\n/g"  arch/arm/mach-rmobile/Kconfig.rza1
 
 #arch/arm/mach-rmobile/Kconfig.rza1
 # (TAG_KCONFIG)
 #source "board/$companyname/$boardname/Kconfig"
-sed -i "s:(TAG_KCONFIG):(TAG_KCONFIG)\nsource \"board/$companyname/$boardname/Kconfig\":g"  ../../../arch/arm/mach-rmobile/Kconfig.rza1
+sed -i "s:(TAG_KCONFIG):(TAG_KCONFIG)\nsource \"board/$companyname/$boardname/Kconfig\":g"  arch/arm/mach-rmobile/Kconfig.rza1
 
 
 
@@ -384,26 +386,26 @@ sed -i "s:(TAG_KCONFIG):(TAG_KCONFIG)\nsource \"board/$companyname/$boardname/Kc
 if [ "$devicetype" == "RZ_A1H" ] ; then
  echo ""  # keep default setting 
 elif [ "$devicetype" == "RZ_A1M" ] ; then
-  sed -i 's/.*#define CONFIG_SYS_SDRAM_SIZE.*/#define CONFIG_SYS_SDRAM_SIZE		\(5 \* 1024 \* 1024\)/' ../../../include/configs/${boardname}.h 
+  sed -i 's/.*#define CONFIG_SYS_SDRAM_SIZE.*/#define CONFIG_SYS_SDRAM_SIZE		\(5 \* 1024 \* 1024\)/' include/configs/${boardname}.h 
 elif [ "$devicetype" == "RZ_A1L" ] ; then
-  sed -i 's/.*#define CONFIG_SYS_SDRAM_SIZE.*/#define CONFIG_SYS_SDRAM_SIZE		\(3 \* 1024 \* 1024\)/' ../../../include/configs/${boardname}.h 
+  sed -i 's/.*#define CONFIG_SYS_SDRAM_SIZE.*/#define CONFIG_SYS_SDRAM_SIZE		\(3 \* 1024 \* 1024\)/' include/configs/${boardname}.h 
 fi
 
 #extal
-sed -i "s/13.33MHz/$extal/" ../../../include/configs/${boardname}.h 
+sed -i "s/13.33MHz/$extal/" include/configs/${boardname}.h 
 
 #p1clockspeed
-sed -i "s/66666666/$p1clockspeed/" ../../../include/configs/${boardname}.h 
+sed -i "s/66666666/$p1clockspeed/" include/configs/${boardname}.h 
 
 #hasusbxtal
 #define CONFIG_R8A66597_XTAL		0x0000	/* 0=48MHz USB_X1, 1=12MHz EXTAL*/
 if [ "$hasusbxtal" == "no" ] ; then
-  sed -i "s/CONFIG_R8A66597_XTAL		0x0000/CONFIG_R8A66597_XTAL		0x0001/" ../../../include/configs/${boardname}.h
+  sed -i "s/CONFIG_R8A66597_XTAL		0x0000/CONFIG_R8A66597_XTAL		0x0001/" include/configs/${boardname}.h
 fi
 
 #scif
 #SCIF_CONSOLE_BASE SCIF2_BASE
-sed -i "s/SCIF2_BASE/${scif}_BASE/" ../../../include/configs/${boardname}.h
+sed -i "s/SCIF2_BASE/${scif}_BASE/" include/configs/${boardname}.h
 
 #hasmmc=no
 if [ "$hasmmc" == "no" ] ; then
@@ -416,14 +418,14 @@ if [ "$hasmmc" == "no" ] ; then
 # #define CONFIG_SH_MMCIF_CLK CONFIG_SYS_CLK_FREQ
 
   # put '#if 0' around lines
-  sed -i "s:.*SH-MMC.*:/* SH-MMC */\n#if 0 /* no eMMC */:" ../../../include/configs/${boardname}.h
-  sed -i "s:.*CONFIG_SH_MMCIF_CLK.*:#define CONFIG_SH_MMCIF_CLK CONFIG_SYS_CLK_FREQ\n#endif:" ../../../include/configs/${boardname}.h
+  sed -i "s:.*SH-MMC.*:/* SH-MMC */\n#if 0 /* no eMMC */:" include/configs/${boardname}.h
+  sed -i "s:.*CONFIG_SH_MMCIF_CLK.*:#define CONFIG_SH_MMCIF_CLK CONFIG_SYS_CLK_FREQ\n#endif:" include/configs/${boardname}.h
 
 #  delete lines
-#  sed -i "s/.*_MMC.*//" ../../../include/configs/${boardname}.h
+#  sed -i "s/.*_MMC.*//" include/configs/${boardname}.h
 
-  sed -i "s/.*CONFIG_MMC.*//" ../../../configs/${boardname}_defconfig
-  echo '# CONFIG_MMC is not set' >> ../../../configs/${boardname}_defconfig
+  sed -i "s/.*CONFIG_MMC.*//" configs/${boardname}_defconfig
+  echo '# CONFIG_MMC is not set' >> configs/${boardname}_defconfig
 fi
 
 #haseth=no
@@ -441,18 +443,18 @@ if [ "$haseth" == "no" ] ; then
 # #define CONFIG_SERVERIP		192.168.0.1
 
   # put '#if 0' around lines
-  sed -i "s:.*Network interface.*:/* Network interface */\n#if 0 /* no Ethernet */:" ../../../include/configs/${boardname}.h
-  sed -i "s:.*CONFIG_SERVERIP.*:#define CONFIG_SERVERIP		192.168.0.1\n#endif:" ../../../include/configs/${boardname}.h
+  sed -i "s:.*Network interface.*:/* Network interface */\n#if 0 /* no Ethernet */:" include/configs/${boardname}.h
+  sed -i "s:.*CONFIG_SERVERIP.*:#define CONFIG_SERVERIP		192.168.0.1\n#endif:" include/configs/${boardname}.h
 
 # Remove these lines from the xxx_defconfig
 # CONFIG_CMD_DHCP=y
 # CONFIG_CMD_MII=y
 # CONFIG_CMD_PING=y
 # CONFIG_CMD_SNTP=y
-sed -i "s/.*CONFIG_CMD_DHCP.*//" ../../../configs/${boardname}_defconfig
-sed -i "s/.*CONFIG_CMD_MII.*//" ../../../configs/${boardname}_defconfig
-sed -i "s/.*CONFIG_CMD_PING.*//" ../../../configs/${boardname}_defconfig
-sed -i "s/.*CONFIG_CMD_SNTP.*//" ../../../configs/${boardname}_defconfig
+sed -i "s/.*CONFIG_CMD_DHCP.*//" configs/${boardname}_defconfig
+sed -i "s/.*CONFIG_CMD_MII.*//" configs/${boardname}_defconfig
+sed -i "s/.*CONFIG_CMD_PING.*//" configs/${boardname}_defconfig
+sed -i "s/.*CONFIG_CMD_SNTP.*//" configs/${boardname}_defconfig
 
 fi
 
@@ -471,24 +473,24 @@ if [ "$hasnorflash" == "no" ] ; then
 # #define CONFIG_MTD_NOR_FLASH
 
   # put '#if 0' around lines
-  sed -i "s:.*\* Parallel NOR Flash \*.*:/* Parallel NOR Flash */\n#if 0 /* no NOR flash */:" ../../../include/configs/${boardname}.h
-  sed -i "s:.*CONFIG_MTD_NOR_FLASH.*:#define CONFIG_MTD_NOR_FLASH\n#endif:" ../../../include/configs/${boardname}.h
+  sed -i "s:.*\* Parallel NOR Flash \*.*:/* Parallel NOR Flash */\n#if 0 /* no NOR flash */:" include/configs/${boardname}.h
+  sed -i "s:.*CONFIG_MTD_NOR_FLASH.*:#define CONFIG_MTD_NOR_FLASH\n#endif:" include/configs/${boardname}.h
 
 
   # Make sure CONFIG_CMD_IMLS is not selected because we didn't set CONFIG_SYS_MAX_FLASH_BANKS
-  echo '# CONFIG_CMD_IMLS is not set' >> ../../../configs/${boardname}_defconfig
+  echo '# CONFIG_CMD_IMLS is not set' >> configs/${boardname}_defconfig
 
 fi
 
 #hasi2c
-if [ "$hasnorflash" == "no" ] ; then
+if [ "$hasi2c" == "no" ] ; then
 
   # Remove these lines from the xxx_defconfig
   # CONFIG_CMD_I2C=y
   # CONFIG_RZA_RIIC=y
 
-  sed -i "s/.*CONFIG_CMD_I2C.*//" ../../../configs/${boardname}_defconfig
-  sed -i "s/.*CONFIG_RZA_RIIC.*//" ../../../configs/${boardname}_defconfig
+  sed -i "s/.*CONFIG_CMD_I2C.*//" configs/${boardname}_defconfig
+  sed -i "s/.*CONFIG_RZA_RIIC.*//" configs/${boardname}_defconfig
 
 fi
 
@@ -496,7 +498,7 @@ fi
 if [ "$hassdram" == "yes" ] ; then
 
   # Remove the '#if 0' around the SDRAM init
-  sed -i "s/.*Have SDRAM.*//" ../../${companyname}/${boardname}/${boardname}.c
+  sed -i "s/.*Have SDRAM.*//" board/${companyname}/${boardname}/${boardname}.c
 
 fi
 
