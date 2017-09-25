@@ -273,7 +273,7 @@ int board_late_init(void)
 
 	#define KERNEL_ADDR_FLASH	"0x18200000"	/* Flash location of xipImage or uImage binary */
 	#define UIMAGE_ADDR_SDRAM	"09000000"	/* Address to copy uImage to in external SDRAM */
-	#define UIMAGE_ADDR_SIZE	"0x40000"	/* Size of the uImage binary in Flash (4MB) */
+	#define UIMAGE_ADDR_SIZE	"0x400000"	/* Size of the uImage binary in Flash (4MB) */
 
 
 	/* Default kernel command line options */
@@ -309,7 +309,7 @@ int board_late_init(void)
 
 	/* => run s_boot */
 	/* Boot SDRAM uImage using external 32MB SDRAM, file system is squashfs, LCD FB fixed to internal RAM */
-	setenv("sa_boot", "run dtb_read_sdram; run dtb_mem_sdram; run dtb_lcdfb_fixed; setenv bootargs ${cmdline_common} ${fs_mtd}; fdt chosen; run uImg");
+	setenv("s_boot", "run dtb_read_sdram; run dtb_mem_sdram; run dtb_lcdfb_fixed; setenv bootargs ${cmdline_common} ${fs_mtd}; fdt chosen; run uImg");
 
 	/* => run sa_boot */
 	/* Boot SDRAM uImage using external 32MB SDRAM, file system is AXFS, LCD FB fixed to internal RAM */
