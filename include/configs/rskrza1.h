@@ -136,6 +136,7 @@
  #define CONFIG_I2C_MULTI_BUS
  #define CONFIG_SYS_MAX_I2C_BUS		4
  #define CONFIG_SYS_I2C_SPEED		100000 /* 100 kHz */
+ #define CONFIG_CMD_EEPROM			/* add eeprom command */
  #define CONFIG_SYS_I2C_EEPROM_ADDR	0x50
  #define CONFIG_SYS_I2C_EEPROM_ADDR_LEN	1
  #define CONFIG_SYS_EEPROM_PAGE_WRITE_BITS	4	/* 16-Byte Write Mode */
