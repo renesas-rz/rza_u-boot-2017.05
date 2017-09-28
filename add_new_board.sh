@@ -8,9 +8,6 @@ if [ ! -e board/renesas/rza1template/rza1template.c ] ; then
   exit
 fi
 
-#cd board/renesas/rza1template
-
-
 #defaults
 boardname=toaster
 companyname=mycompany
@@ -32,7 +29,7 @@ hassdram=no
 
 while [ "1" == "1" ]
 do
-	echo 'whiptail --title "Add new BSP Board"  --noitem --menu "Make changes the items below as needed, then press create.\nYou may use ESC+ESC to cancel." 0 0 0 \' > /tmp/whipcmd.txt
+	echo 'whiptail --title "Add new BSP Board"  --noitem --menu "Make changes the items below as needed, then select Create BSP.\nYou may use ESC+ESC to cancel." 0 0 0 \' > /tmp/whipcmd.txt
 	echo '"         Board Name: $boardname" "" \' >> /tmp/whipcmd.txt
 	echo '"       Company Name: $companyname" "" \' >> /tmp/whipcmd.txt
 	echo '"        Device Type: $devicetype" "" \' >> /tmp/whipcmd.txt
@@ -185,7 +182,7 @@ source /tmp/whipcmd.txt
 	2> /tmp/answer.txt
 
     extal=$(cat /tmp/answer.txt)
-    
+
   if [ "$extal" == "10MHz" ] ; then
     p1clockspeed=50000000
   fi
@@ -364,6 +361,12 @@ sed -i "s/RZA1TEMPLATE/$boardnameupper/g"  configs/${boardname}_defconfig
 #rza1template.h
 sed -i "s/RZA1TEMPLATE/$boardnameupper/g"  include/configs/${boardname}.h
 
+
+
+
+ALREADY_ADDED=`grep "config TARGET_$boardnameupper" arch/arm/mach-rmobile/Kconfig.rza1`
+if [ "$ALREADY_ADDED" == "" ] ; then
+
 #arch/arm/mach-rmobile/Kconfig.rza1
 # (TAG_TARGET)
 #config TARGET_$boardnameupper
@@ -376,6 +379,7 @@ sed -i "s/(TAG_TARGET)/(TAG_TARGET)\nconfig TARGET_$boardnameupper\n\tbool \"$bo
 #source "board/$companyname/$boardname/Kconfig"
 sed -i "s:(TAG_KCONFIG):(TAG_KCONFIG)\nsource \"board/$companyname/$boardname/Kconfig\":g"  arch/arm/mach-rmobile/Kconfig.rza1
 
+fi
 
 
 ####################################
@@ -384,18 +388,18 @@ sed -i "s:(TAG_KCONFIG):(TAG_KCONFIG)\nsource \"board/$companyname/$boardname/Kc
 
 #devicetype
 if [ "$devicetype" == "RZ_A1H" ] ; then
- echo ""  # keep default setting 
+ echo ""  # keep default setting
 elif [ "$devicetype" == "RZ_A1M" ] ; then
-  sed -i 's/.*#define CONFIG_SYS_SDRAM_SIZE.*/#define CONFIG_SYS_SDRAM_SIZE		\(5 \* 1024 \* 1024\)/' include/configs/${boardname}.h 
+  sed -i 's/.*#define CONFIG_SYS_SDRAM_SIZE.*/#define CONFIG_SYS_SDRAM_SIZE		\(5 \* 1024 \* 1024\)/' include/configs/${boardname}.h
 elif [ "$devicetype" == "RZ_A1L" ] ; then
-  sed -i 's/.*#define CONFIG_SYS_SDRAM_SIZE.*/#define CONFIG_SYS_SDRAM_SIZE		\(3 \* 1024 \* 1024\)/' include/configs/${boardname}.h 
+  sed -i 's/.*#define CONFIG_SYS_SDRAM_SIZE.*/#define CONFIG_SYS_SDRAM_SIZE		\(3 \* 1024 \* 1024\)/' include/configs/${boardname}.h
 fi
 
 #extal
-sed -i "s/13.33MHz/$extal/" include/configs/${boardname}.h 
+sed -i "s/13.33MHz/$extal/" include/configs/${boardname}.h
 
 #p1clockspeed
-sed -i "s/66666666/$p1clockspeed/" include/configs/${boardname}.h 
+sed -i "s/66666666/$p1clockspeed/" include/configs/${boardname}.h
 
 #hasusbxtal
 #define CONFIG_R8A66597_XTAL		0x0000	/* 0=48MHz USB_X1, 1=12MHz EXTAL*/
@@ -406,6 +410,25 @@ fi
 #scif
 #SCIF_CONSOLE_BASE SCIF2_BASE
 sed -i "s/SCIF2_BASE/${scif}_BASE/" include/configs/${boardname}.h
+
+# setenv("cmdline_common", "ignore_loglevel earlyprintk earlycon=scif,0xE8008000");
+if [ "$scif" == "SCIF0" ] ; then
+  sed -i "s/0xE8008000/0xE8007000/g"  board/${companyname}/${boardname}/${boardname}.c
+elif [ "$scif" == "SCIF1" ] ; then
+  sed -i "s/0xE8008000/0xE8007800/g"  board/${companyname}/${boardname}/${boardname}.c
+elif [ "$scif" == "SCIF2" ] ; then
+  sed -i "s/0xE8008000/0xE8008000/g"  board/${companyname}/${boardname}/${boardname}.c
+elif [ "$scif" == "SCIF3" ] ; then
+  sed -i "s/0xE8008000/0xE8008800/g"  board/${companyname}/${boardname}/${boardname}.c
+elif [ "$scif" == "SCIF4" ] ; then
+  sed -i "s/0xE8008000/0xE8009000/g"  board/${companyname}/${boardname}/${boardname}.c
+elif [ "$scif" == "SCIF5" ] ; then
+  sed -i "s/0xE8008000/0xE8009800/g"  board/${companyname}/${boardname}/${boardname}.c
+elif [ "$scif" == "SCIF6" ] ; then
+  sed -i "s/0xE8008000/0xE800A000/g"  board/${companyname}/${boardname}/${boardname}.c
+elif [ "$scif" == "SCIF7" ] ; then
+  sed -i "s/0xE8008000/0xE800A800/g"  board/${companyname}/${boardname}/${boardname}.c
+fi
 
 #hasmmc=no
 if [ "$hasmmc" == "no" ] ; then
