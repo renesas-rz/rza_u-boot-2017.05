@@ -11,7 +11,7 @@
 /* XIP Kernel boot */
 int do_bootx(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
 {
-	ulong machid = MACH_TYPE_RSKRZA1;
+	ulong machid = 0xFFFFFFFF;	/* Device Tree Boot */
 	void (*kernel_entry)(int zero, int arch, uint params);
 	ulong r2;
 	ulong img_addr;
