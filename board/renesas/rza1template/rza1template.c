@@ -52,13 +52,13 @@ int board_early_init_f(void)
 	/* Adjust for your board as needed. */
 
 	/* Serial Console */
-#if 0 /*** PLEASE configure pins and 'ALTx' according to Tables 54.xx in the Hardware Manaul ***/
+#if 0 /*** PLEASE configure pins and 'ALTx' according to Tables 54.xx in the Hardware Manual ***/
 	pfc_set_pin_function(3, 0, ALT6, 0, 0);	/* P3_0 = TxD2 */
 	pfc_set_pin_function(3, 2, ALT4, 0, 0);	/* P3_2 = RxD2 */
 #endif
 
 	/* QSPI_0 ch0 (booted in 1-bit, need to change to 4-bit) */
-#if 0 /*** PLEASE configure pins and 'ALTx' according to Tables 54.xx in the Hardware Manaul ***/
+#if 0 /*** PLEASE configure pins and 'ALTx' according to Tables 54.xx in the Hardware Manual ***/
 	pfc_set_pin_function(9, 2, ALT2, 0, 0);	/* P9_2 = SPBCLK_0 */
 	pfc_set_pin_function(9, 3, ALT2, 0, 0);	/* P9_3 = SPBSSL_0 */
 	pfc_set_pin_function(9, 4, ALT2, 0, 1);	/* P9_4 = SPBIO00_0 (bi dir) */
@@ -68,7 +68,7 @@ int board_early_init_f(void)
 #endif
 
 	/* QSPI_0 ch1 (4-bit interface for dual QSPI mode) */
-#if 0 /*** PLEASE configure pins and 'ALTx' according to Tables 54.xx in the Hardware Manaul ***/
+#if 0 /*** PLEASE configure pins and 'ALTx' according to Tables 54.xx in the Hardware Manual ***/
 	pfc_set_pin_function(2, 12, ALT4, 0, 1); /* P2_12 = SPBIO01_0 (bi dir) */
 	pfc_set_pin_function(2, 13, ALT4, 0, 1); /* P2_13 = SPBIO11_0 (bi dir) */
 	pfc_set_pin_function(2, 14, ALT4, 0, 1); /* P2_14 = SPBIO21_0 (bi dir) */
@@ -76,13 +76,13 @@ int board_early_init_f(void)
 #endif
 
 	/* RIIC Ch 3 */
-#if 0 /*** PLEASE configure pins and 'ALTx' according to Tables 54.xx in the Hardware Manaul ***/
+#if 0 /*** PLEASE configure pins and 'ALTx' according to Tables 54.xx in the Hardware Manual ***/
 	pfc_set_pin_function(1, 6, ALT1, 0, 1);	/* P1_6 = RIIC3SCL (bi dir) */
 	pfc_set_pin_function(1, 7, ALT1, 0, 1);	/* P1_7 = RIIC3SDA (bi dir) */
 #endif
 
 	/* Ethernet */
-#if 0 /*** PLEASE configure pins and 'ALTx' according to Tables 54.xx in the Hardware Manaul ***/
+#if 0 /*** PLEASE configure pins and 'ALTx' according to Tables 54.xx in the Hardware Manual ***/
 	pfc_set_pin_function(1, 14, ALT4, 0, 0); /* P1_14 = ET_COL */
 	pfc_set_pin_function(5, 9, ALT2, 0, 0);	/* P5_9 = ET_MDC */
 	pfc_set_pin_function(3, 3, ALT2, 0, 1);	/* P3_3 = ET_MDIO (bi dir) */
@@ -105,7 +105,7 @@ int board_early_init_f(void)
 #endif
 
 	/* MMC */
-#if 0 /*** PLEASE configure pins and 'ALTx' according to Tables 54.xx in the Hardware Manaul ***/
+#if 0 /*** PLEASE configure pins and 'ALTx' according to Tables 54.xx in the Hardware Manual ***/
 	pfc_set_pin_function(3, 8, ALT8, 0, 0);		/* MMC CD */
 	pfc_set_pin_function(3, 10, ALT8, 0, 1);	/* MMC DAT1 (bi dir) */
 	pfc_set_pin_function(3, 11, ALT8, 0, 1);	/* MMC DAT0 (bi dir) */
@@ -120,7 +120,7 @@ int board_early_init_f(void)
 #endif
 
 	/* SDRAM */
-#if 0 /*** PLEASE configure pins and 'ALTx' according to Tables 54.xx in the Hardware Manaul ***/
+#if 0 /*** PLEASE configure pins and 'ALTx' according to Tables 54.xx in the Hardware Manual ***/
 	pfc_set_pin_function(5, 8, ALT6, 0, 0);	/* P5_8 = CS2 */
 	for(i=0;i<=15;i++)
 		pfc_set_pin_function(6, i, ALT1, 0, 1);	/* P6_0~15 = D0-D15 (bi dir) */
@@ -137,7 +137,7 @@ int board_early_init_f(void)
 #endif
 
 	/* Parallel NOR Flash */
-#if 0 /*** PLEASE configure pins and 'ALTx' according to Tables 54.xx in the Hardware Manaul ***/
+#if 0 /*** PLEASE configure pins and 'ALTx' according to Tables 54.xx in the Hardware Manual ***/
 	/* Assumes previous SDRAM setup A1-A23,D0-D15,WE0 */
 	pfc_set_pin_function(9, 0, ALT1, 0, 0);	/* P9_0 = A24 */
 	pfc_set_pin_function(9, 1, ALT1, 0, 0);	/* P9_1 = A25 */
