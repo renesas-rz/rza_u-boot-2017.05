@@ -20,6 +20,7 @@ hasusbxtal=no
 scif=SCIF2
 
 hasmmc=no
+hassdhi=no
 hasnorflash=no
 haseth=no
 
@@ -38,6 +39,7 @@ do
 	echo '"     Serial Console: $scif" "" \' >> /tmp/whipcmd.txt
 	echo '"     External SDRAM: $hassdram" "" \' >> /tmp/whipcmd.txt
 	echo '"         eMMC Flash: $hasmmc" "" \' >> /tmp/whipcmd.txt
+	echo '"       SD Card Host: $hassdhi" "" \' >> /tmp/whipcmd.txt
 	echo '" Parallel NOR Flash: $hasnorflash" "" \' >> /tmp/whipcmd.txt
 	echo '"           Ethernet: $haseth" "" \' >> /tmp/whipcmd.txt
 	echo '"                I2C: $hasi2c" "" \' >> /tmp/whipcmd.txt
@@ -225,6 +227,22 @@ source /tmp/whipcmd.txt
 	2> /tmp/answer.txt
 
     hasmmc=$(cat /tmp/answer.txt)
+    continue
+  fi
+
+
+  ####################################
+  # hassdhi
+  ####################################
+  echo "$ans" | grep -q "SD Card Host:"
+  if [ "$?" == "0" ] ; then
+    whiptail --title "SD Card Host" --nocancel --menu "Does this board have SD Card Host?" 0 0 0 \
+	"ch0" "SDHI-0" \
+	"ch1" "SDHI-1" \
+	"no" "" \
+	2> /tmp/answer.txt
+
+    hassdhi=$(cat /tmp/answer.txt)
     continue
   fi
 
@@ -449,6 +467,25 @@ if [ "$hasmmc" == "no" ] ; then
 
   sed -i "s/.*CONFIG_MMC.*//" configs/${boardname}_defconfig
   echo '# CONFIG_MMC is not set' >> configs/${boardname}_defconfig
+fi
+
+#hassdhi=ch0
+if [ "$hassdhi" == "ch0" ] ; then
+
+# CONFIG_SYS_SH_SDHI1_BASE -> CONFIG_SYS_SH_SDHI0_BASE
+sed -i "s:CONFIG_SYS_SH_SDHI1_BASE:CONFIG_SYS_SH_SDHI0_BASE:" board/${companyname}/${boardname}/${boardname}.c
+
+# RZ_SDHI_CHANNEL 1 -> RZ_SDHI_CHANNEL 0
+sed -i "s:RZ_SDHI_CHANNEL			1:RZ_SDHI_CHANNEL			0:" include/configs/${boardname}.h
+
+fi
+
+if [ "$hassdhi" == "no" ] ; then
+
+  # put '#if 0' around lines
+  sed -i "s:.*SH-SDHI.*:/* SH-SDHI */\n#if 0 /* no SD host */:" include/configs/${boardname}.h
+  sed -i "s:.*RZ_SDHI_CHANNEL.*:#define RZ_SDHI_CHANNEL			1\n#endif:" include/configs/${boardname}.h
+
 fi
 
 #haseth=no

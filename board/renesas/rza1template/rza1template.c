@@ -14,6 +14,7 @@
 #include <spi_flash.h>
 #include <netdev.h>
 #include <asm/arch/mmc.h>
+#include <asm/arch/sh_sdhi.h>
 
 //#define DEBUG
 
@@ -117,6 +118,18 @@ int board_early_init_f(void)
 	pfc_set_pin_function(4, 1, ALT8, 0, 1);		/* MMC DAT5 (bi dir) */
 	pfc_set_pin_function(4, 2, ALT8, 0, 1);		/* MMC DAT6 (bi dir) */
 	pfc_set_pin_function(4, 3, ALT8, 0, 1);		/* MMC DAT7 (bi dir) */
+#endif
+
+	/* SDHI */
+#if 0 /*** PLEASE configure pins and 'ALTx' according to Tables 54.xx in the Hardware Manual ***/
+	pfc_set_pin_function(3, 8, ALT7, 0, 0);		/* SD_CD_1 */
+	pfc_set_pin_function(3, 9, ALT7, 0, 0);		/* SD_WP_1 */
+	pfc_set_pin_function(3, 10, ALT7, 0, 1);	/* SD_D1_1 (bi dir) */
+	pfc_set_pin_function(3, 11, ALT7, 0, 1);	/* SD_D0_1 (bi dir) */
+	pfc_set_pin_function(3, 12, ALT7, 0, 0);	/* SD_CLK_1 */
+	pfc_set_pin_function(3, 13, ALT7, 0, 1);	/* SD_CMD_1 (bi dir) */
+	pfc_set_pin_function(3, 14, ALT7, 0, 1);	/* SD_D3_1 (bi dir) */
+	pfc_set_pin_function(3, 15, ALT7, 0, 1);	/* SD_D2_1 (bi dir) */
 #endif
 
 	/* SDRAM */
@@ -246,6 +259,11 @@ int board_mmc_init(bd_t *bis)
 	int ret = 0;
 #ifdef CONFIG_SH_MMCIF
 	ret = mmcif_mmc_init();
+#endif
+
+#ifdef CONFIG_SH_SDHI
+	ret = sh_sdhi_init(CONFIG_SYS_SH_SDHI1_BASE, RZ_SDHI_CHANNEL,
+			   SH_SDHI_QUIRK_32BIT_BUF);
 #endif
 	return ret;
 }
