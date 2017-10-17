@@ -273,6 +273,7 @@ static int sh_sdhi_single_read(struct sh_sdhi_host *host, struct mmc_data *data)
 	unsigned short blocksize, i;
 	unsigned short *p = (unsigned short *)data->dest;
 	u64 *q = (u64 *)data->dest;
+	u32 *d = (u32 *)data->dest;
 
 	if ((unsigned long)p & 0x00000001) {
 		debug(DRIVER_NAME": %s: The data pointer is unaligned.",
@@ -296,6 +297,9 @@ static int sh_sdhi_single_read(struct sh_sdhi_host *host, struct mmc_data *data)
 	if (host->quirks & SH_SDHI_QUIRK_64BIT_BUF)
 		for (i = 0; i < blocksize / 8; i++)
 			*q++ = sh_sdhi_readq(host, SDHI_BUF0);
+	else if (host->quirks & SH_SDHI_QUIRK_32BIT_BUF)
+		for (i = 0; i < blocksize / 4; i++)
+			*d++ = sh_sdhi_readq(host, SDHI_BUF0);
 	else
 		for (i = 0; i < blocksize / 2; i++)
 			*p++ = sh_sdhi_readw(host, SDHI_BUF0);
@@ -314,6 +318,7 @@ static int sh_sdhi_multi_read(struct sh_sdhi_host *host, struct mmc_data *data)
 	unsigned short blocksize, i, sec;
 	unsigned short *p = (unsigned short *)data->dest;
 	u64 *q = (u64 *)data->dest;
+	u32 *d = (u32 *)data->dest;
 
 	if ((unsigned long)p & 0x00000001) {
 		debug(DRIVER_NAME": %s: The data pointer is unaligned.",
@@ -339,6 +344,9 @@ static int sh_sdhi_multi_read(struct sh_sdhi_host *host, struct mmc_data *data)
 		if (host->quirks & SH_SDHI_QUIRK_64BIT_BUF)
 			for (i = 0; i < blocksize / 8; i++)
 				*q++ = sh_sdhi_readq(host, SDHI_BUF0);
+		else if (host->quirks & SH_SDHI_QUIRK_32BIT_BUF)
+			for (i = 0; i < blocksize / 4; i++)
+				*d++ = sh_sdhi_readq(host, SDHI_BUF0);
 		else
 			for (i = 0; i < blocksize / 2; i++)
 				*p++ = sh_sdhi_readw(host, SDHI_BUF0);
@@ -354,6 +362,7 @@ static int sh_sdhi_single_write(struct sh_sdhi_host *host,
 	unsigned short blocksize, i;
 	const unsigned short *p = (const unsigned short *)data->src;
 	const u64 *q = (const u64 *)data->src;
+	const u32 *d = (const u32 *)data->src;
 
 	if ((unsigned long)p & 0x00000001) {
 		debug(DRIVER_NAME": %s: The data pointer is unaligned.",
@@ -381,6 +390,9 @@ static int sh_sdhi_single_write(struct sh_sdhi_host *host,
 	if (host->quirks & SH_SDHI_QUIRK_64BIT_BUF)
 		for (i = 0; i < blocksize / 8; i++)
 			sh_sdhi_writeq(host, SDHI_BUF0, *q++);
+	else if (host->quirks & SH_SDHI_QUIRK_32BIT_BUF)
+		for (i = 0; i < blocksize / 4; i++)
+			sh_sdhi_writeq(host, SDHI_BUF0, *d++);
 	else
 		for (i = 0; i < blocksize / 2; i++)
 			sh_sdhi_writew(host, SDHI_BUF0, *p++);
@@ -399,6 +411,7 @@ static int sh_sdhi_multi_write(struct sh_sdhi_host *host, struct mmc_data *data)
 	unsigned short i, sec, blocksize;
 	const unsigned short *p = (const unsigned short *)data->src;
 	const u64 *q = (const u64 *)data->src;
+	const u32 *d = (const u32 *)data->src;
 
 	debug("%s: blocks = %d, blocksize = %d\n",
 	      __func__, data->blocks, data->blocksize);
@@ -418,6 +431,9 @@ static int sh_sdhi_multi_write(struct sh_sdhi_host *host, struct mmc_data *data)
 		if (host->quirks & SH_SDHI_QUIRK_64BIT_BUF)
 			for (i = 0; i < blocksize / 8; i++)
 				sh_sdhi_writeq(host, SDHI_BUF0, *q++);
+		else if (host->quirks & SH_SDHI_QUIRK_32BIT_BUF)
+			for (i = 0; i < blocksize / 4; i++)
+				sh_sdhi_writeq(host, SDHI_BUF0, *d++);
 		else
 			for (i = 0; i < blocksize / 2; i++)
 				sh_sdhi_writew(host, SDHI_BUF0, *p++);
@@ -775,7 +791,8 @@ int sh_sdhi_init(unsigned long addr, int ch, unsigned long quirks)
 
 	if (host->quirks & SH_SDHI_QUIRK_64BIT_BUF)
 		host->bus_shift = 2;
-	else if (host->quirks & SH_SDHI_QUIRK_16BIT_BUF)
+	else if (host->quirks & (SH_SDHI_QUIRK_16BIT_BUF ||
+		 SH_SDHI_QUIRK_32BIT_BUF))
 		host->bus_shift = 1;
 
 	return ret;
@@ -854,6 +871,8 @@ static int sh_sdhi_dm_probe(struct udevice *dev)
 
 	if (host->quirks & SH_SDHI_QUIRK_64BIT_BUF)
 		host->bus_shift = 2;
+	else if (host->quirks & SH_SDHI_QUIRK_32BIT_BUF)
+		host->bus_shift = 1;
 	else if (host->quirks & SH_SDHI_QUIRK_16BIT_BUF)
 		host->bus_shift = 1;
 

@@ -164,6 +164,7 @@
 /* For quirk */
 #define SH_SDHI_QUIRK_16BIT_BUF		BIT(0)
 #define SH_SDHI_QUIRK_64BIT_BUF		BIT(1)
+#define SH_SDHI_QUIRK_32BIT_BUF		BIT(2)
 
 int sh_sdhi_init(unsigned long addr, int ch, unsigned long quirks);
 
