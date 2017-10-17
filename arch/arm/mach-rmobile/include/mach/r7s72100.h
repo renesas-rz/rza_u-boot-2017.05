@@ -49,6 +49,11 @@ void pfc_set_pin_function(u16 n, u16 b, u16 alt, u16 inbuf, u16 bi);
 /* QSPI bases */
 #define CONFIG_RZA1_BASE_QSPI0		0x3FEFA000
 
+/* SDHI bases */
+#define CONFIG_SYS_SH_SDHI_NR_CHANNEL	2
+#define CONFIG_SYS_SH_SDHI0_BASE	0xe804e000
+#define CONFIG_SYS_SH_SDHI1_BASE	0xe804e800
+
 /* Clock Registers */
 #define FRQCR (RZA1_FRQCR_BASE + 0x00)
 #define FRQCR2 (RZA1_FRQCR_BASE + 0x04)
