@@ -167,9 +167,18 @@
 #define CONFIG_MMC			1
 #define CONFIG_CMD_MMC
 #define CONFIG_GENERIC_MMC		1
+#if 0
 #define CONFIG_SH_MMCIF			1
 #define CONFIG_SH_MMCIF_ADDR		0xE804C800
 #define CONFIG_SH_MMCIF_CLK CONFIG_SYS_CLK_FREQ
+#endif
+
+/* SD */
+#if 1
+#define CONFIG_SH_SDHI
+#define RZ_SDHI_CHANNEL	1
+#define CONFIG_SH_SDHI_FREQ	(CONFIG_SYS_CLK_FREQ/2) /* 1/2 P1 clk */
+#endif
 
 /*
  * Lowlevel configuration
