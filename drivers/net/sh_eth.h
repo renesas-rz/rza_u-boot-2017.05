@@ -256,6 +256,7 @@ static const u16 sh_eth_offset_rz[SH_ETH_MAX_REGISTER_OFFSET] = {
 	[ECMR]	= 0x0500,
 	[ECSR]	= 0x0510,
 	[ECSIPR]	= 0x0518,
+	[PIR]	= 0x0520,
 	[PSR]	= 0x0528,
 	[PIPR]	= 0x052c,
 	[RFLR]	= 0x0508,
