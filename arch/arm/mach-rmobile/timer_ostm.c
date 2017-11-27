@@ -80,14 +80,17 @@ static unsigned long get_usec (void)
 
 	cmcnt = data;
 
-	/* Timer source clock (P0) is 33.33 Mhz */
-	return (unsigned long)(ost0_timer / 33);
+	/*
+	 * Timer source clock (P0) is 25.00 - 33.33 Mhz.
+	 * It is always half the rate of P1 clock
+	 */
+	return (unsigned long)(ost0_timer / (CONFIG_SYS_CLK_FREQ / 2 / 1000000));
 }
 
 /* return msec */
 ulong get_timer(ulong base)
 {
-	const ulong timecnt = OST_TIMER_RESET / (33 * 1000); /*130150*/
+	const ulong timecnt = OST_TIMER_RESET / (CONFIG_SYS_CLK_FREQ / 2 / 1000);
 	ulong now = (get_usec() / 1000);
 	
 	if (now >= base)
