@@ -376,7 +376,6 @@ static int sh_eth_config(struct sh_eth_dev *eth, bd_t *bd)
 	int port = eth->port, ret = 0;
 	u32 val;
 	struct sh_eth_info *port_info = &eth->port_info[port];
-	struct eth_device *dev = port_info->dev;
 	struct phy_device *phy;
 
 	/* Configure e-dmac registers */
@@ -395,14 +394,6 @@ static int sh_eth_config(struct sh_eth_dev *eth, bd_t *bd)
 
 	/* Configure e-mac registers */
 	sh_eth_write(eth, 0, ECSIPR);
-
-	/* Set Mac address */
-	val = dev->enetaddr[0] << 24 | dev->enetaddr[1] << 16 |
-	    dev->enetaddr[2] << 8 | dev->enetaddr[3];
-	sh_eth_write(eth, val, MAHR);
-
-	val = dev->enetaddr[4] << 8 | dev->enetaddr[5];
-	sh_eth_write(eth, val, MALR);
 
 	sh_eth_write(eth, RFLR_RFL_MIN, RFLR);
 #if defined(SH_ETH_TYPE_GETHER)
@@ -527,6 +518,22 @@ void sh_eth_halt(struct eth_device *dev)
 	sh_eth_stop(eth);
 }
 
+static int sh_eth_write_hwaddr(struct eth_device *dev)
+{
+	u32 val;
+	struct sh_eth_dev *eth = dev->priv;
+
+	/* Set Mac address */
+	val = dev->enetaddr[0] << 24 | dev->enetaddr[1] << 16 |
+	    dev->enetaddr[2] << 8 | dev->enetaddr[3];
+	sh_eth_write(eth, val, MAHR);
+
+	val = dev->enetaddr[4] << 8 | dev->enetaddr[5];
+	sh_eth_write(eth, val, MALR);
+
+	return 0;
+}
+
 int sh_eth_initialize(bd_t *bd)
 {
 	int ret = 0;
@@ -559,6 +566,7 @@ int sh_eth_initialize(bd_t *bd)
 	dev->send = sh_eth_send;
 	dev->recv = sh_eth_recv;
 	eth->port_info[eth->port].dev = dev;
+	dev->write_hwaddr = sh_eth_write_hwaddr;
 
 	strcpy(dev->name, SHETHER_NAME);
 
