@@ -23,15 +23,24 @@
  **********************************************************************/
 
 /* Winbond 256Mb (32MByte) SDRAM: Part number W9825G6KH-6I
- *  [ Stream it V2 boards ] */
-/* #define SDRAM_W9825G6KH_6I */
+ *  [ Stream it V2 boards ]
+ * NOTE: If you have modified your board to only use 16MB so that you
+ * can also use the camera, please define SDRAM_SIZE_MB to '16' instead */
+#define SDRAM_W9825G6KH_6I
+#define SDRAM_SIZE_MB 32	/* 32 or 16 */
 
 /* ISSI 128Mb (16MByte) SDRAM: Part number IS42/45S16800F
  *   Requires pin lift and jumper wire */
-/* #define SDRAM_IS42_45S16800F */
+/*
+#define SDRAM_IS42_45S16800F
+#define SDRAM_SIZE_MB 16
+*/
 
 /* No SDRAM populated, just use the internal 3MB RAM */
-/* #define SDRAM_NONE */
+/*
+#define SDRAM_NONE
+#define SDRAM_SIZE_MB 0
+*/
 
 
 /* Print error and stop build if no selection has been made */

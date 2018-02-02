@@ -109,11 +109,11 @@ int board_early_init_f(void)
 	pfc_set_pin_function(2, 6, ALT1, 0, 0);	/* P2_6 = RD/WR */
 	pfc_set_pin_function(2, 4, ALT1, 0, 0);	/* P2_4 = WE0/DQMLL */
 	pfc_set_pin_function(2, 5, ALT1, 0, 0);	/* P2_5 = WE1/DQMLU */
-#ifdef SDRAM_W9825G6KH_6I
+#if SDRAM_SIZE_MB == 32
 	for(i=0;i<=14;i++)
 		pfc_set_pin_function(3, i, ALT1, 0, 0);	/* P3_0~14: A1-A15 */
 #endif
-#ifdef SDRAM_IS42_45S16800F
+#if SDRAM_SIZE_MB ==16
 	for(i=0;i<=13;i++)
 		pfc_set_pin_function(3, i, ALT1, 0, 0);	/* P3_0~13: A1-A14 */
 #endif
@@ -251,13 +251,19 @@ int board_late_init(void)
 	/* Default addresses */
 	#define DTB_ADDR_FLASH		"C0000"		/* Location of Device Tree in QSPI Flash (SPI flash offset) */
 	#define DTB_ADDR_RAM		"20200000"	/* Internal RAM location to copy Device Tree */
-	#define DTB_ADDR_SDRAM		"0D800000"	/* External SDRAM location to copy Device Tree */
+	#define DTB_ADDR_SDRAM		"0CF00000"	/* External SDRAM location to copy Device Tree */
 
 	#define MEM_ADDR_RAM		"0x20000000 0x00300000"	/* System Memory for when using on-chip RAM (3MB) */
+#if SDRAM_SIZE_MB == 32
 	#define MEM_ADDR_SDRAM		"0x0C000000 0x02000000"	/* System Memory for when using external SDRAM RAM (32MB) */
+#elif SDRAM_SIZE_MB == 16
+	#define MEM_ADDR_SDRAM		"0x0C000000 0x01000000"	/* System Memory for when using external SDRAM RAM (16MB) */
+#elif SDRAM_SIZE_MB == 0
+	#define MEM_ADDR_SDRAM		"0x0C000000 0x00000000"	/* Not using SDRAM */
+#endif
 
 	#define KERNEL_ADDR_FLASH	"0x18200000"	/* Flash location of xipImage or uImage binary */
-	#define UIMAGE_ADDR_SDRAM	"0D000000"	/* Address to copy uImage to in external SDRAM */
+	#define UIMAGE_ADDR_SDRAM	"0C800000"	/* Address to copy uImage to in external SDRAM */
 	#define UIMAGE_ADDR_SIZE	"0x400000"	/* Size of the uImage binary in Flash (4MB) */
 
 
