@@ -1,4 +1,3 @@
-#define SDRAM_W9825G6KH_6I
 /*
  * Configuration settings for the Renesas STREAMIT board
  *
