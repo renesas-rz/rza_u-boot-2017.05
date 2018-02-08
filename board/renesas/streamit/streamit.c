@@ -65,8 +65,12 @@ int board_early_init_f(void)
 
 
 	/* RIIC Ch 0 (EEPROM) */
-	pfc_set_pin_function(1, 0, ALT1, 0, 1);	/* P1_0 = RIIC3SCL (bi dir) */
-	pfc_set_pin_function(1, 1, ALT1, 0, 1);	/* P1_1 = RIIC3SDA (bi dir) */
+	pfc_set_pin_function(1, 0, ALT1, 0, 1);	/* P1_0 = RIIC0SCL (bi dir) */
+	pfc_set_pin_function(1, 1, ALT1, 0, 1);	/* P1_1 = RIIC0SDA (bi dir) */
+
+	/* RIIC Ch 1 (Touchscreen, Camera, Accelerometer, Audio) */
+	pfc_set_pin_function(1, 2, ALT1, 0, 1);	/* P1_2 = RIIC1SCL (bi dir) */
+	pfc_set_pin_function(1, 3, ALT1, 0, 1);	/* P1_3 = RIIC1SDA (bi dir) */
 
 	/* Enable USB 5 Volt supply */
 	pfc_set_gpio(7, 1, GPIO_OUT); /* P7_1 = GPIO_OUT */
