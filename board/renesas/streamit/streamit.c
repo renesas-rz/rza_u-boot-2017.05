@@ -128,6 +128,23 @@ int board_early_init_f(void)
 	/* USER_SW */
 	pfc_set_gpio(7, 9, GPIO_IN); /* P7_9 = GPIO_IN */
 
+#if SDRAM_SIZE_MB != 32
+	/* Enable CEU Camera interface */
+	pfc_set_pin_function(4, 0, ALT2, 0, 0);		/* VIO_VD */
+	pfc_set_pin_function(4, 1, ALT2, 0, 0);		/* VIO_HD */
+	pfc_set_pin_function(3, 14, ALT2, 0, 0);	/* VIO_CLK */
+
+	pfc_set_pin_function(1, 4, ALT4, 0, 0);		/* VIO_D0 */
+	pfc_set_pin_function(1, 5, ALT4, 0, 0);		/* VIO_D1 */
+	pfc_set_pin_function(1, 6, ALT4, 0, 0);		/* VIO_D2 */
+	pfc_set_pin_function(1, 7, ALT4, 0, 0);		/* VIO_D3 */
+
+	pfc_set_pin_function(1, 12, ALT4, 0, 0);	/* VIO_D4 */
+	pfc_set_pin_function(1, 13, ALT4, 0, 0);	/* VIO_D5 */
+	pfc_set_pin_function(1, 14, ALT4, 0, 0);	/* VIO_D6 */
+	pfc_set_pin_function(1, 15, ALT4, 0, 0);	/* VIO_D7 */
+#endif
+
 	/**********************************************/
 	/* Configure SDRAM (CS3)                      */
 	/**********************************************/
