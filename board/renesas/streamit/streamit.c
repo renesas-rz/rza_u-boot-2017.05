@@ -320,6 +320,10 @@ int board_late_init(void)
 	/* Boot XIP using external 32MB SDRAM, file system is AXFS, LCD FB fixed to internal RAM */
 	setenv("xsa_boot", "run dtb_read_sdram; run dtb_mem_sdram; run dtb_lcdfb_fixed; setenv bootargs ${cmdline_common} ${fs_axfs}; fdt chosen; run xImg");
 
+	/* => run xsa_boot */
+	/* Boot XIP using external 32MB SDRAM, file system is AXFS, enable Ethernet (by disabling the LCD) */
+	setenv("xsa_eth_boot", "run dtb_read_sdram; run dtb_mem_sdram; fdt set /display@fcff7400 status dis; setenv bootargs ${cmdline_common} ${fs_axfs}; fdt chosen; run xImg");
+
 	/* => run s_boot */
 	/* Boot SDRAM uImage using external 32MB SDRAM, file system is squashfs, LCD FB fixed to internal RAM */
 	setenv("s_boot", "run dtb_read_sdram; run dtb_mem_sdram; run dtb_lcdfb_fixed; setenv bootargs ${cmdline_common} ${fs_mtd}; fdt chosen; run uImg");
