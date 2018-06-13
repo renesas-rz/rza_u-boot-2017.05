@@ -94,7 +94,7 @@ int enable_quad_macronix(struct spi_flash *sf, u8 quad_addr, u8 quad_data )
 {
 	/* NOTE: This driver is reference from Spansion */
 	/* NOTE: Due to the Flash size <=16MB, it used  3-bytes of address */
-	/* NOTE: Once quad comamnds are enabled, you don't need to disable
+	/* NOTE: Once quad commands are enabled, you don't need to disable
 		 them to use the non-quad mode commands, so we just always
 		 leave them on. */
 	int ret = 0;
@@ -188,7 +188,7 @@ int enable_quad_macronix(struct spi_flash *sf, u8 quad_addr, u8 quad_data )
 int enable_quad_spansion(struct spi_flash *sf, u8 quad_addr, u8 quad_data )
 {
 	/* NOTE: Macronix and Windbond are similar to Spansion */
-	/* NOTE: Once quad comamnds are enabled, you don't need to disable
+	/* NOTE: Once quad commands are enabled, you don't need to disable
 		 them to use the non-quad mode commands, so we just always
 		 leave them on. */
 	int ret = 0;
@@ -326,7 +326,7 @@ int enable_quad_micron(struct spi_flash *sf, u8 quad_addr, u8 quad_data )
 		qspi_disable_auto_combine();	/* only lasts 1 call */
 		ret |= spi_flash_cmd(sf->spi, 0xB5, nvcfg_reg, 2*2);
 
-		/* swap 2nd and 3rd bytes...becase data for each
+		/* swap 2nd and 3rd bytes...because data for each
 		   SPI flash comes in interleaved */
 		tmp = ((u8 *)nvcfg_reg)[1];
 		((u8 *)nvcfg_reg)[1] = ((u8 *)nvcfg_reg)[2];
@@ -392,7 +392,7 @@ int enable_quad_micron(struct spi_flash *sf, u8 quad_addr, u8 quad_data )
 	g_QUAD_RD_DMY = 3;		/* Quad Read Mode: 3 cycles  */
 	g_QUAD_IO_RD_DMY = 5;		/* Quad I/O Read Mode: 5 cycles  */
 
-	g_QUAD_IO_RD_OPT = 0;		/* Quad I/O Read Mode: no additonal cycles */
+	g_QUAD_IO_RD_OPT = 0;		/* Quad I/O Read Mode: no additional cycles */
 
 	/* NOTE: This part can not run DDR at 66MHz */
 	g_QUAD_IO_DDR_RD_DMY = 0;	/* Quad I/O DDR Read Mode  */
@@ -403,7 +403,7 @@ int enable_quad_micron(struct spi_flash *sf, u8 quad_addr, u8 quad_data )
 		/* When in QUAD I/O mode, sometimes the data is not correct.
 		   It appears like the address gets corrupted. Therefore
 		   we need to slow down the SPI clock in this mode. */
-		/* This might be becase the board this code was devleopted on
+		/* This might be because the board this code was developed on
 		   had lots of wire leads attached to the SPI flash pins */
 		#define	QSPI_SPBCR (0x0008)
 		*(u32 *)(CONFIG_RZA1_BASE_QSPI0 + QSPI_SPBCR) = 0x0300; /* 22.22 Mbps */
@@ -568,8 +568,8 @@ int do_qspi(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
 		return 1;
 	}
 
-	/* The only think we have access to is the string name of the
-	 * deivce. Use that name to search the ID table to find the chip
+	/* The only thing we have access to is the string name of the
+	 * device. Use that name to search the ID table to find the chip
 	 * ID */
 	id = &spi_flash_ids[0];
 	while (id->name) {
@@ -622,7 +622,7 @@ int do_qspi(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
 
 	/* Set data pins HIGH when not being used. This helps make sure that
 	if you go from dual chip to single chip, only FF will get
-	transfered out tp the second chip. */
+	transferred out to the second chip. */
 	cmncr &= ~0x00FF0000UL;
 	cmncr |=  0x00550000UL;
 
@@ -690,7 +690,7 @@ int do_qspi(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
 		drenr = 0x02024700;
 #endif
 
-		/* Use Option data regsiters to output 0x00 to write the
+		/* Use Option data registers to output 0x00 to write the
 		   'mode' byte by sending OPD3 (at 4-bit) between address
 		   and dummy */
 		if ( g_QUAD_IO_RD_OPT ) {
@@ -716,7 +716,7 @@ int do_qspi(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
 		drdrenr = 0x00000111;
 
 		/* According to the Spansion spec (Table 8.5), dummy cycles
-		   are needed when LC=00b for READ DDR QUAD I/O commnds */
+		   are needed when LC=00b for READ DDR QUAD I/O commands */
 		/* Add extra Dummy cycles between address and data */
 		dmdmcr = 0x00020000 | (g_QUAD_IO_DDR_RD_DMY-1); /* 4 bit size, x cycles */
 		drenr |= 0x00008000; /* Set Dummy Cycle Enable (DME) */
@@ -736,8 +736,8 @@ int do_qspi(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
 	/* Allow 32MB of SPI addressing (POR default is only 16MB) */
 	*(volatile u32 *)DREAR_0 = 0x00000001;
 
-	/* Turn Read Burst on, Burst Length=2 uints (also set cache flush) */
-	/* Keep SSL low (SSLE=1) in case the next transfer is continugous with
+	/* Turn Read Burst on, Burst Length=2 units (also set cache flush) */
+	/* Keep SSL low (SSLE=1) in case the next transfer is continuous with
 	   our last...saves on address cycle. */
 	*(u32 *)DRCR_0 = 0x00010301;
 	asm("nop");
