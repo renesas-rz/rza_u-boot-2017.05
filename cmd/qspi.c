@@ -120,7 +120,7 @@ int enable_quad_macronix(struct spi_flash *sf, u8 quad_addr, u8 quad_data )
 
 #ifdef DEBUG
 	printf("Initial Values:\n");
-	for(cmd = 0; cmd <= spi_cnt; cmd++) {
+	for(cmd = 0; cmd < spi_cnt; cmd++) {
 		printf("   SPI Flash %d:\n", cmd+1);
 		printf("\tStatus register = %02X\n", st_reg[cmd]);
 		printf("\tConfiguration register = %02X\n", cfg_reg[cmd]);
@@ -129,8 +129,8 @@ int enable_quad_macronix(struct spi_flash *sf, u8 quad_addr, u8 quad_data )
 
 	/* Skip SPI Flash configure if already correct */
 	/* Note that if dual SPI flash, both have to be set */
-	if ( (cfg_reg[0] != 0x02 ) ||
-	     ((spi_cnt == 2) && (cfg_reg[1] != 0x02 ))) {
+	if ( (st_reg[0] != 0x40 ) ||
+	     ((spi_cnt == 2) && (st_reg[1] != 0x40 ))) {
 
 		data[0] = 0x40;	/* status reg: Set QUAD bit */
 		data[1] = 0x00; /* confg reg: Don't Care */
@@ -143,6 +143,7 @@ int enable_quad_macronix(struct spi_flash *sf, u8 quad_addr, u8 quad_data )
 		ret |= spi_flash_cmd_write(sf->spi, &cmd, 1, data, 2);
 
 		/* Wait till WIP clears */
+		/* Read Status register (RDSR1 05h) */
 		do
 			spi_flash_cmd(sf->spi, 0x05, &data[0], 1);
 		while( data[0] & 0x01 );
@@ -159,7 +160,7 @@ int enable_quad_macronix(struct spi_flash *sf, u8 quad_addr, u8 quad_data )
 	ret |= spi_flash_cmd(sf->spi, 0x15, cfg_reg, 1*spi_cnt);
 
 	printf("New Values:\n");
-	for(cmd = 0; cmd <= spi_cnt; cmd++) {
+	for(cmd = 0; cmd < spi_cnt; cmd++) {
 		printf("   SPI Flash %d:\n", cmd+1);
 		printf("\tStatus register = %02X\n", st_reg[cmd]);
 		printf("\tConfiguration register = %02X\n", cfg_reg[cmd]);
@@ -214,7 +215,7 @@ int enable_quad_spansion(struct spi_flash *sf, u8 quad_addr, u8 quad_data )
 
 #ifdef DEBUG
 	printf("Initial Values:\n");
-	for(cmd = 0; cmd <= spi_cnt; cmd++) {
+	for(cmd = 0; cmd < spi_cnt; cmd++) {
 		printf("   SPI Flash %d:\n", cmd+1);
 		printf("\tStatus register = %02X\n", st_reg[cmd]);
 		printf("\tConfiguration register = %02X\n", cfg_reg[cmd]);
@@ -253,7 +254,7 @@ int enable_quad_spansion(struct spi_flash *sf, u8 quad_addr, u8 quad_data )
 	ret |= spi_flash_cmd(sf->spi, 0x35, cfg_reg, 1*spi_cnt);
 
 	printf("New Values:\n");
-	for(cmd = 0; cmd <= spi_cnt; cmd++) {
+	for(cmd = 0; cmd < spi_cnt; cmd++) {
 		printf("   SPI Flash %d:\n", cmd+1);
 		printf("\tStatus register = %02X\n", st_reg[cmd]);
 		printf("\tConfiguration register = %02X\n", cfg_reg[cmd]);
