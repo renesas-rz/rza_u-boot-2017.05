@@ -265,19 +265,19 @@ int board_late_init(void)
 
 	/* => run xa_boot */
 	/* Boot XIP using internal RAM only, file system is AXFS, LCD dynamically allocated */
-	setenv("xa_boot", "run dtb_read_ram; run dtb_mem_ram; run dtb_lcdfb_dyn; setenv bootargs ${cmdline_common} ${fs_axfs}; fdt chosen; run xImg");
+	setenv("xa_boot", "run dtb_read_ram dtb_mem_ram dtb_lcdfb_dyn; setenv bootargs ${cmdline_common} ${fs_axfs}; fdt chosen; run xImg");
 
 	/* => run xsa_boot */
 	/* Boot XIP using external 32MB SDRAM, file system is AXFS, LCD FB fixed to internal RAM */
-	setenv("xsa_boot", "run dtb_read_sdram; run dtb_mem_sdram; run dtb_lcdfb_fixed; setenv bootargs ${cmdline_common} ${fs_axfs}; fdt chosen; run xImg");
+	setenv("xsa_boot", "run dtb_read_sdram dtb_mem_sdram dtb_lcdfb_fixed; setenv bootargs ${cmdline_common} ${fs_axfs}; fdt chosen; run xImg");
 
 	/* => run s_boot */
 	/* Boot SDRAM uImage using external 32MB SDRAM, file system is squashfs, LCD FB fixed to internal RAM */
-	setenv("s_boot", "run dtb_read_sdram; run dtb_mem_sdram; run dtb_lcdfb_fixed; setenv bootargs ${cmdline_common} ${fs_mtd}; fdt chosen; run uImg");
+	setenv("s_boot", "run dtb_read_sdram dtb_mem_sdram dtb_lcdfb_fixed; setenv bootargs ${cmdline_common} ${fs_mtd}; fdt chosen; run uImg");
 
 	/* => run sa_boot */
 	/* Boot SDRAM uImage using external 32MB SDRAM, file system is AXFS, LCD FB fixed to internal RAM */
-	setenv("sa_boot", "run dtb_read_sdram; run dtb_mem_sdram; run dtb_lcdfb_fixed; setenv bootargs ${cmdline_common} ${fs_axfs}; fdt chosen; run uImg");
+	setenv("sa_boot", "run dtb_read_sdram dtb_mem_sdram dtb_lcdfb_fixed; setenv bootargs ${cmdline_common} ${fs_axfs}; fdt chosen; run uImg");
 
 	return 0;
 }

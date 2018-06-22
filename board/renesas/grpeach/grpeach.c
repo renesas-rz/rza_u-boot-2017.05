@@ -177,11 +177,11 @@ int board_late_init(void)
 
 	/* => run xa_boot */
 	/* Boot XIP using internal RAM only, file system is AXFS, LCD dynamically allocated */
-	setenv("xa_boot", "run dtb_read_ram; run dtb_mem_ram; run dtb_lcdfb_dyn; setenv bootargs ${cmdline_common} ${fs_axfs}; fdt chosen; run xImg");
+	setenv("xa_boot", "run dtb_read_ram dtb_mem_ram dtb_lcdfb_dyn; setenv bootargs ${cmdline_common} ${fs_axfs}; fdt chosen; run xImg");
 
 	/* => run xu_boot */
 	/* Boot XIP using internal RAM only, file system is on USB, LCD dynamically allocated */
-	setenv("xu_boot", "run dtb_read_ram; run dtb_mem_ram; run dtb_lcdfb_dyn; setenv bootargs ${cmdline_common} root=/dev/sda1 rootwait; fdt chosen; run xImg");
+	setenv("xu_boot", "run dtb_read_ram dtb_mem_ram dtb_lcdfb_dyn; setenv bootargs ${cmdline_common} root=/dev/sda1 rootwait; fdt chosen; run xImg");
 
 
 	/* Boot XIP using internal RAM */
