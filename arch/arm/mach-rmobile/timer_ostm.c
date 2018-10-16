@@ -33,6 +33,11 @@
 #define OST_MAX_COUNTER (0xFFFFFFFF)
 #define OST_TIMER_RESET (0xFFFFFFFF)
 
+#if defined(CONFIG_R7S72100)
+#define OST_CLK_FREQ (CONFIG_SYS_CLK_FREQ / 2) /* Timer source clock (P0) is half the rate of P1 clock */
+#elif defined(CONFIG_R7S9210)
+#define OST_CLK_FREQ CONFIG_SYS_CLK_FREQ
+#endif
 static vu_long ost0_timer;
 
 static void ost_timer_start(unsigned int timer)
@@ -80,17 +85,13 @@ static unsigned long get_usec (void)
 
 	cmcnt = data;
 
-	/*
-	 * Timer source clock (P0) is 25.00 - 33.33 Mhz.
-	 * It is always half the rate of P1 clock
-	 */
-	return (unsigned long)(ost0_timer / (CONFIG_SYS_CLK_FREQ / 2 / 1000000));
+	return (unsigned long)(ost0_timer / (OST_CLK_FREQ / 1000000));
 }
 
 /* return msec */
 ulong get_timer(ulong base)
 {
-	const ulong timecnt = OST_TIMER_RESET / (CONFIG_SYS_CLK_FREQ / 2 / 1000);
+	const ulong timecnt = OST_TIMER_RESET / (OST_CLK_FREQ / 1000);
 	ulong now = (get_usec() / 1000);
 	
 	if (now >= base)
