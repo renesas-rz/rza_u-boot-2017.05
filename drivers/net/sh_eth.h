@@ -364,13 +364,17 @@ static const u16 sh_eth_offset_fast_sh4[SH_ETH_MAX_REGISTER_OFFSET] = {
 #elif defined(CONFIG_R7S72100)
 #define SH_ETH_TYPE_RZ
 #define BASE_IO_ADDR	0xE8203000
+#elif defined(CONFIG_R7S9210)
+#define SH_ETH_TYPE_RZ
+#define BASE_IO_ADDR	0xE8204000	/* EDMAC0 + ETHERC0 */
+//#define BASE_IO_ADDR	0xE8204200	/* EDMAC1 + ETHERC1 */
 #endif
 
 /*
  * Register's bits
  * Copy from Linux driver source code
  */
-#if defined(SH_ETH_TYPE_GETHER) || defined(SH_ETH_TYPE_RZ)
+#if defined(SH_ETH_TYPE_GETHER) || defined(CONFIG_R7S72100)
 /* EDSR */
 enum EDSR_BIT {
 	EDSR_ENT = 0x01, EDSR_ENR = 0x02,
@@ -381,11 +385,11 @@ enum EDSR_BIT {
 /* EDMR */
 enum DMAC_M_BIT {
 	EDMR_DL1 = 0x20, EDMR_DL0 = 0x10,
-#if defined(SH_ETH_TYPE_GETHER) || defined(SH_ETH_TYPE_RZ)
+#if defined(SH_ETH_TYPE_GETHER) || defined(CONFIG_R7S72100)
 	EDMR_SRST	= 0x03, /* Receive/Send reset */
 	EMDR_DESC_R	= 0x30, /* Descriptor reserve size */
 	EDMR_EL		= 0x40, /* Litte endian */
-#elif defined(SH_ETH_TYPE_ETHER)
+#elif defined(SH_ETH_TYPE_ETHER) || defined(CONFIG_R7S9210)
 	EDMR_SRST	= 0x01,
 	EMDR_DESC_R	= 0x30, /* Descriptor reserve size */
 	EDMR_EL		= 0x40, /* Litte endian */
@@ -407,7 +411,7 @@ enum DMAC_M_BIT {
 
 /* EDTRR */
 enum DMAC_T_BIT {
-#if defined(SH_ETH_TYPE_GETHER) || defined(SH_ETH_TYPE_RZ)
+#if defined(SH_ETH_TYPE_GETHER) || defined(CONFIG_R7S72100)
 	EDTRR_TRNS = 0x03,
 #else
 	EDTRR_TRNS = 0x01,
@@ -452,7 +456,7 @@ enum PHY_STATUS_BIT { PHY_ST_LINK = 0x01, };
 
 /* EESR */
 enum EESR_BIT {
-#if defined(SH_ETH_TYPE_ETHER)
+#if defined(SH_ETH_TYPE_ETHER) || defined(CONFIG_R7S9210)
 	EESR_TWB  = 0x40000000,
 #else
 	EESR_TWB  = 0xC0000000,
@@ -469,7 +473,7 @@ enum EESR_BIT {
 	EESR_FTC  = 0x00200000, EESR_TDE  = 0x00100000,
 	EESR_TFE  = 0x00080000, EESR_FRC  = 0x00040000,
 	EESR_RDE  = 0x00020000, EESR_RFE  = 0x00010000,
-#if defined(SH_ETH_TYPE_ETHER)
+#if defined(SH_ETH_TYPE_ETHER) || defined(CONFIG_R7S9210)
 	EESR_CND  = 0x00000800,
 #endif
 	EESR_DLC  = 0x00000400,
@@ -558,7 +562,7 @@ enum TD_STS_BIT {
 enum RECV_RST_BIT { RMCR_RST = 0x01, };
 /* ECMR */
 enum FELIC_MODE_BIT {
-#if defined(SH_ETH_TYPE_GETHER) || defined(SH_ETH_TYPE_RZ)
+#if defined(SH_ETH_TYPE_GETHER) || defined(CONFIG_R7S72100)
 	ECMR_TRCCM = 0x04000000, ECMR_RCSC = 0x00800000,
 	ECMR_DPAD = 0x00200000, ECMR_RZPF = 0x00100000,
 #endif
@@ -570,16 +574,17 @@ enum FELIC_MODE_BIT {
 #ifdef CONFIG_CPU_SH7724
 	ECMR_RTM = 0x00000010,
 #elif defined(CONFIG_R8A7790) || defined(CONFIG_R8A7791) || \
-	defined(CONFIG_R8A7793) || defined(CONFIG_R8A7794)
+	defined(CONFIG_R8A7793) || defined(CONFIG_R8A7794) || \
+	defined(CONFIG_R7S9210)
 	ECMR_RTM = 0x00000004,
 #endif
 
 };
 
-#if defined(SH_ETH_TYPE_GETHER) || defined(SH_ETH_TYPE_RZ)
+#if defined(SH_ETH_TYPE_GETHER) || defined(CONFIG_R7S72100)
 #define ECMR_CHG_DM (ECMR_TRCCM | ECMR_RZPF | ECMR_ZPF | ECMR_PFR | \
 			ECMR_RXF | ECMR_TXF | ECMR_MCT)
-#elif defined(SH_ETH_TYPE_ETHER)
+#elif defined(SH_ETH_TYPE_ETHER) || defined(CONFIG_R7S9210)
 #define ECMR_CHG_DM (ECMR_ZPF | ECMR_PFR | ECMR_RXF | ECMR_TXF)
 #else
 #define ECMR_CHG_DM	(ECMR_ZPF | ECMR_PFR | ECMR_RXF | ECMR_TXF | ECMR_MCT)
@@ -662,9 +667,9 @@ static inline unsigned long sh_eth_reg_addr(struct sh_eth_dev *eth,
 {
 #if defined(SH_ETH_TYPE_GETHER)
 	const u16 *reg_offset = sh_eth_offset_gigabit;
-#elif defined(SH_ETH_TYPE_ETHER)
+#elif defined(SH_ETH_TYPE_ETHER) || defined(CONFIG_R7S9210)
 	const u16 *reg_offset = sh_eth_offset_fast_sh4;
-#elif defined(SH_ETH_TYPE_RZ)
+#elif defined(CONFIG_R7S72100)
 	const u16 *reg_offset = sh_eth_offset_rz;
 #else
 #error

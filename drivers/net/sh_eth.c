@@ -158,8 +158,10 @@ static int sh_eth_reset(struct sh_eth_dev *eth)
 #if defined(SH_ETH_TYPE_GETHER) || defined(SH_ETH_TYPE_RZ)
 	int ret = 0, i;
 
+#if !defined(CONFIG_R7S9210)
 	/* Start e-dmac transmitter and receiver */
 	sh_eth_write(eth, EDSR_ENALL, EDSR);
+#endif
 
 	/* Perform a software reset and wait for it to complete */
 	sh_eth_write(eth, EDMR_SRST, EDMR);
@@ -227,8 +229,10 @@ static int sh_eth_tx_desc_init(struct sh_eth_dev *eth)
 	sh_eth_write(eth, ADDR_TO_PHY(port_info->tx_desc_base), TDLAR);
 #if defined(SH_ETH_TYPE_GETHER) || defined(SH_ETH_TYPE_RZ)
 	sh_eth_write(eth, ADDR_TO_PHY(port_info->tx_desc_base), TDFAR);
+#if !defined(CONFIG_R7S9210)
 	sh_eth_write(eth, ADDR_TO_PHY(cur_tx_desc), TDFXR);
 	sh_eth_write(eth, 0x01, TDFFR);/* Last discriptor bit */
+#endif
 #endif
 
 err:
@@ -294,8 +298,10 @@ static int sh_eth_rx_desc_init(struct sh_eth_dev *eth)
 	sh_eth_write(eth, ADDR_TO_PHY(port_info->rx_desc_base), RDLAR);
 #if defined(SH_ETH_TYPE_GETHER) || defined(SH_ETH_TYPE_RZ)
 	sh_eth_write(eth, ADDR_TO_PHY(port_info->rx_desc_base), RDFAR);
+#if !defined(CONFIG_R7S9210)
 	sh_eth_write(eth, ADDR_TO_PHY(cur_rx_desc), RDFXR);
 	sh_eth_write(eth, RDFFR_RDLF, RDFFR);
+#endif
 #endif
 
 	return ret;
@@ -455,7 +461,7 @@ static int sh_eth_config(struct sh_eth_dev *eth, bd_t *bd)
 		sh_eth_write(eth, 1, RTRATE);
 #elif defined(CONFIG_CPU_SH7724) || defined(CONFIG_R8A7790) || \
 		defined(CONFIG_R8A7791) || defined(CONFIG_R8A7793) || \
-		defined(CONFIG_R8A7794)
+		defined(CONFIG_R8A7794) || defined(CONFIG_R7S9210)
 		val = ECMR_RTM;
 #endif
 	} else if (phy->speed == 10) {
