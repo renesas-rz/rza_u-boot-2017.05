@@ -37,14 +37,22 @@ int spi_flash_cmd_write(struct spi_slave *spi, const u8 *cmd, size_t cmd_len,
 		const void *data, size_t data_len);
 extern const struct spi_flash_info spi_flash_ids[];
 
-#define CMNCR_0	0x3FEFA000	/* Common control register */
-#define DRCR_0	0x3FEFA00C	/* Data Read Control Register */
-#define DRCMR_0	0x3FEFA010	/* Data Read Command Setting Register */
-#define DREAR_0 0x3FEFA014	/* Data read extended address setting register */
-#define DRENR_0 0x3FEFA01C	/* Data read enable setting register */
-#define DROPR_0 0x3FEFA018	/* Data read option setting register */
-#define DMDMCR_0 0x3FEFA058	/* SPI Mode Dummy Cycle Setting Register */
-#define DRDRENR_0 0x3FEFA05C	/* Data Read DDR Enable Register */
+#if defined(CONFIG_RZA1)
+ #define CONFIG_RZA_BASE_QSPI0		0x3FEFA000
+#elif defined(CONFIG_RZA2)
+ #define CONFIG_RZA_BASE_QSPI0		0x1F800000
+#else
+#error "Unknown Device"
+#endif
+
+#define CMNCR_0	(CONFIG_RZA_BASE_QSPI0 + 0x000)	/* Common control register */
+#define DRCR_0	(CONFIG_RZA_BASE_QSPI0 + 0x00C)	/* Data Read Control Register */
+#define DRCMR_0	(CONFIG_RZA_BASE_QSPI0 + 0x010)	/* Data Read Command Setting Register */
+#define DREAR_0 (CONFIG_RZA_BASE_QSPI0 + 0x014)	/* Data read extended address setting register */
+#define DRENR_0 (CONFIG_RZA_BASE_QSPI0 + 0x01C)	/* Data read enable setting register */
+#define DROPR_0 (CONFIG_RZA_BASE_QSPI0 + 0x018)	/* Data read option setting register */
+#define DMDMCR_0 (CONFIG_RZA_BASE_QSPI0 + 0x058)	/* SPI Mode Dummy Cycle Setting Register */
+#define DRDRENR_0 (CONFIG_RZA_BASE_QSPI0 + 0x05C)	/* Data Read DDR Enable Register */
 
 
 struct read_mode {
@@ -406,9 +414,11 @@ int enable_quad_micron(struct spi_flash *sf, u8 quad_addr, u8 quad_data )
 		   we need to slow down the SPI clock in this mode. */
 		/* This might be because the board this code was developed on
 		   had lots of wire leads attached to the SPI flash pins */
+#ifdef CONFIG_RZA1_BASE_QSPI0
 		#define	QSPI_SPBCR (0x0008)
 		*(u32 *)(CONFIG_RZA1_BASE_QSPI0 + QSPI_SPBCR) = 0x0300; /* 22.22 Mbps */
 		printf("\nINFO: clock is now 22.22Mbps (see function %s)\n\n",__func__);
+#endif
 	}
 
 	return ret;
