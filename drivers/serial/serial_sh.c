@@ -63,8 +63,15 @@ static void sh_serial_init_generic(struct uart_port *port)
 	sci_out(port, SCFCR, SCFCR_RFRST|SCFCR_TFRST);
 	sci_in(port, SCFCR);
 	sci_out(port, SCFCR, 0);
-#ifdef CONFIG_CPU_RZA1
-	sci_out(port, SCSPTR, 0x0053);
+#if defined(CONFIG_CPU_R7S72100) || defined(CONFIG_R7S9210)
+	sci_out(port, SCSPTR, 0x0003);
+#endif
+#if defined(CONFIG_R7S9210)
+	/* For SCIF, the default value of TEND after reset is 0, but
+	   this driver expects it to be 1, so we will get stuck waiting
+	   and never send out the first character. Therefore, we'll
+	   send out a 'harmless' NULL (0x00). */
+//	sci_out(port, SCxTDR, 0x00);
 #endif
 }
 

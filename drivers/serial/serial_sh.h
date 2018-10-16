@@ -235,6 +235,9 @@ struct uart_port {
 # endif
 # define SCSCR_INIT(port)	(port->clk_mode == EXT_CLK ? 0x32 : 0x30)
 				/* TIE=0,RIE=0,TE=1,RE=1,REIE=0, */
+#elif defined(CONFIG_R7S9210)
+# define SCIF_ORER 0x0001		/* Overrun error bit */
+# define SCSCR_INIT(port)	0x30	/* TIE=0,RIE=0,TE=1,RE=1,REIE=0 */
 #else
 # error CPU subtype not defined
 #endif
@@ -586,6 +589,18 @@ SCIF_FNS(SCLSR,  0,  0, 0x14, 16)
 #else
 SCIF_FNS(SCLSR,  0,  0, 0x24, 16)
 #endif
+#elif defined(CONFIG_R7S9210)
+SCIF_FNS(SCSMR,  0x00, 8, 0x00, 16)
+SCIF_FNS(SCBRR,  0x01, 8, 0x02,  8)
+SCIF_FNS(SCSCR,  0x02, 8, 0x04, 16)
+SCIF_FNS(SCxTDR, 0x03, 8, 0x06,  8)
+SCIF_FNS(SCxSR,  0x04, 8, 0x08, 16)
+SCIF_FNS(SCxRDR, 0x05, 8, 0x0A,  8)
+SCIF_FNS(SCFCR,     0, 0, 0x0C, 16)
+SCIF_FNS(SCFDR,     0, 0, 0x0E, 16)
+SCIF_FNS(SCSPTR,    0, 0, 0x10, 16)
+SCIF_FNS(SCLSR,     0, 0, 0x12,  16)
+SCIF_FNS(DL,	    0, 0, 0x00,  0) /* dummy */
 #else
 /*      reg      SCI/SH3   SCI/SH4  SCIF/SH3   SCIF/SH4  SCI/H8*/
 /*      name     off  sz   off  sz   off  sz   off  sz   off  sz*/
