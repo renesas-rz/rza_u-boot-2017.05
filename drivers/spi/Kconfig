@@ -219,7 +219,14 @@ config TI_QSPI
 
 config RZ_SPI
 	bool "Renesas RZ SPI driver"
+	depends on RZA1
 	help
 	  Enable the Renesas SPI driver for QSPI ch0.
+
+config RZA2_QSPI
+	bool "Renesas RZ/A2M QSPI driver"
+	depends on RZA2
+	help
+	  Enable the Renesas RZ/A2M QSPI driver
 
 endmenu # menu "SPI Support"
