@@ -19,5 +19,6 @@ obj-$(CONFIG_R8A7794) += lowlevel_init_ca15.o cpu_info-rcar.o pfc-r8a7794.o
 obj-$(CONFIG_R8A7795) += lowlevel_init_gen3.o cpu_info-rcar.o pfc-r8a7795.o memmap-r8a7795.o
 obj-$(CONFIG_SH73A0) += lowlevel_init.o cpu_info-sh73a0.o pfc-sh73a0.o
 obj-$(CONFIG_R7S72100) += cpu_info-rza1.o timer_ostm.o pfc-r7s72100.o
+obj-$(CONFIG_R7S9210) += cpu_info-rza2.o timer_ostm.o
 
 obj-$(CONFIG_TMU_TIMER) += ../../sh/lib/time.o

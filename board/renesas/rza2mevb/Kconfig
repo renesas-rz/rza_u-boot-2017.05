@@ -1,0 +1,12 @@
+if TARGET_RZA2MEVB
+
+config SYS_BOARD
+	default "rza2mevb"
+
+config SYS_VENDOR
+	default "renesas"
+
+config SYS_CONFIG_NAME
+	default "rza2mevb"
+
+endif

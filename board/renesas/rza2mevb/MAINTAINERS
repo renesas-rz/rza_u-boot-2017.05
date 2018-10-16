@@ -1,0 +1,6 @@
+RZA2MEVB BOARD
+#M:	-
+S:	Maintained
+F:	board/renesas/rza2mevb/
+F:	include/configs/rza2mevb.h
+F:	configs/rza2mevb_defconfig

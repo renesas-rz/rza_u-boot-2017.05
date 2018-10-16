@@ -20,6 +20,8 @@
 #include <asm/arch/r8a7795.h>
 #elif defined(CONFIG_R7S72100)
 #include <asm/arch/r7s72100.h>
+#elif defined(CONFIG_R7S9210)
+#include <asm/arch/r7s9210.h>
 #else
 #error "SOC Name not defined"
 #endif

@@ -16,6 +16,10 @@ config RZA1
 	prompt "Renesas ARM SoCs RZ/A1"
 	select CPU_V7
 
+config RZA2
+	prompt "Renesas ARM SoCs RZ/A2"
+	select CPU_V7
+
 endchoice
 
 source "arch/arm/mach-rmobile/Kconfig.32"
