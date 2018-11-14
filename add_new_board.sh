@@ -429,25 +429,6 @@ fi
 #SCIF_CONSOLE_BASE SCIF2_BASE
 sed -i "s/SCIF2_BASE/${scif}_BASE/" include/configs/${boardname}.h
 
-# setenv("cmdline_common", "ignore_loglevel earlyprintk earlycon=scif,0xE8008000");
-if [ "$scif" == "SCIF0" ] ; then
-  sed -i "s/0xE8008000/0xE8007000/g"  board/${companyname}/${boardname}/${boardname}.c
-elif [ "$scif" == "SCIF1" ] ; then
-  sed -i "s/0xE8008000/0xE8007800/g"  board/${companyname}/${boardname}/${boardname}.c
-elif [ "$scif" == "SCIF2" ] ; then
-  sed -i "s/0xE8008000/0xE8008000/g"  board/${companyname}/${boardname}/${boardname}.c
-elif [ "$scif" == "SCIF3" ] ; then
-  sed -i "s/0xE8008000/0xE8008800/g"  board/${companyname}/${boardname}/${boardname}.c
-elif [ "$scif" == "SCIF4" ] ; then
-  sed -i "s/0xE8008000/0xE8009000/g"  board/${companyname}/${boardname}/${boardname}.c
-elif [ "$scif" == "SCIF5" ] ; then
-  sed -i "s/0xE8008000/0xE8009800/g"  board/${companyname}/${boardname}/${boardname}.c
-elif [ "$scif" == "SCIF6" ] ; then
-  sed -i "s/0xE8008000/0xE800A000/g"  board/${companyname}/${boardname}/${boardname}.c
-elif [ "$scif" == "SCIF7" ] ; then
-  sed -i "s/0xE8008000/0xE800A800/g"  board/${companyname}/${boardname}/${boardname}.c
-fi
-
 #hasmmc=no
 if [ "$hasmmc" == "no" ] ; then
 # /* SH-MMC */

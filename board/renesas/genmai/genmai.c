@@ -259,7 +259,7 @@ int board_late_init(void)
 
 
 	/* Default kernel command line options */
-	setenv("cmdline_common", "ignore_loglevel earlyprintk earlycon=scif,0xE8008000");
+	setenv("cmdline_common", "ignore_loglevel earlyprintk earlycon");
 
 	/* Root file system choices */
 	setenv("fs_axfs", "rootfstype=axfs rootflags=physaddr=0x18800000");

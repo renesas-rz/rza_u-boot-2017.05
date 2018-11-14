@@ -289,7 +289,7 @@ int board_late_init(void)
 
 
 	/* Default kernel command line options */
-	setenv("cmdline_common", "ignore_loglevel earlyprintk earlycon=scif,0xE8008800"); /* Linux-4.9 */
+	setenv("cmdline_common", "ignore_loglevel earlyprintk earlycon"); /* Linux-4.9+ */
 	//setenv("cmdline_common", "console=ttySC3,115200 ignore_loglevel earlyprintk"); /* Linux-3.14 */
 
 	/* Root file system choices */
