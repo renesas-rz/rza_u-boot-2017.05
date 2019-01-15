@@ -359,6 +359,10 @@ int board_early_init_f(void)
 	pfc_set_pin_function(P9, 1, 4);	/* P9_1 = RxD4 */
 #endif
 
+	/* I2C 3 */
+	pfc_set_pin_function(PD, 6, 1);	/* PD_6 = SCL3 */
+	pfc_set_pin_function(PD, 7, 1);	/* PD_7 = SDA3 */
+
 	/* Ethernet */
 #if 1
 /** RMII mode **/
@@ -517,6 +521,7 @@ int board_mmc_init(bd_t *bis)
 int board_late_init(void)
 {
 	u8 mac[6]={0x74, 0x90, 0x50, 0xC0, 0xFE, 0x06};
+        u8 senddata[2];
 
 	char line1[] = "\t\t |                     |\n";
 	char line2[] = "\t\t |                     |\n";
@@ -537,6 +542,19 @@ int board_late_init(void)
 
 	if (is_valid_ethaddr(mac))
 		eth_setenv_enetaddr("ethaddr", mac);
+
+#if 1	/* Enable the HDMI converter */
+	/* (some kits do not come with LCD displays) */
+	senddata[0] = (uint8_t)(0x08u);	// reg address
+	senddata[1] = (uint8_t)(0xbdu);
+
+	/* Init I2C-3 bus for TFP410 HDMI converter */
+	i2c_init(100000, 0);	/* speed = 100kHz */
+	i2c_set_bus_num(3);	/* I2C ch-3 */
+
+	/* Slave = 0x78 (HW manual says 0x78, but really it's 7-bit address is 0x3C)*/
+	i2c_write((0x78 >> 1), senddata[0], 1, senddata+1, 1);
+#endif
 
 #if 1 /* Single QSPI flash */
 	printf(	"\t\t      SPI Flash Memory Map\n"
