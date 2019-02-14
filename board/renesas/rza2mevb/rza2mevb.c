@@ -543,12 +543,12 @@ int board_late_init(void)
 	if (is_valid_ethaddr(mac))
 		eth_setenv_enetaddr("ethaddr", mac);
 
-#if 1	/* Enable the HDMI converter */
+#if 1	/* Enable the TFP410 Digital Transmitter */
 	/* (some kits do not come with LCD displays) */
 	senddata[0] = (uint8_t)(0x08u);	// reg address
 	senddata[1] = (uint8_t)(0xbdu);
 
-	/* Init I2C-3 bus for TFP410 HDMI converter */
+	/* Init I2C-3 bus for TFP410 */
 	i2c_init(100000, 0);	/* speed = 100kHz */
 	i2c_set_bus_num(3);	/* I2C ch-3 */
 
