@@ -124,6 +124,10 @@
   #define CONFIG_ENV_OFFSET		0 /* dummy */
   #define CONFIG_ENV_SECT_SIZE		0 /* dummy */
 
+  #undef SW6_4
+  #define SW6_4	SW_OFF
+  #undef SW6_5
+  #define SW6_5	SW_OFF
 #else
   #error "huh?"
 #endif
