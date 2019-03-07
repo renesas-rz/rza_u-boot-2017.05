@@ -536,9 +536,10 @@ int board_late_init(void)
 	char SW6_6_str[2][10] = {"VDC6","NAND"};
 	char SW6_7_str[2][10] = {"VDC6","SIM"};
 
-	/* Increase the clock speed of the QSPI now that we are running
-	   in RAM. P0(33MHz) -> P1(66MHz) */
-	*(volatile u16 *)SCLKSEL |= 1; /* QSPI Clock = P1 */
+	/* Increase the clock speed of the QSPI
+	 * P0(33MHz) -> B(132MHz)
+	 * SPI clock pin will be 1/2 the IP peripheral speed (66MHz) */
+	*(volatile u16 *)SCLKSEL |= 2; /* QSPI Clock = B */
 
 	if (is_valid_ethaddr(mac))
 		eth_setenv_enetaddr("ethaddr", mac);
