@@ -39,6 +39,37 @@
 #define SW6_7	SW_ON
 
 
+/* Enable the on-board HyperRAM */
+/* HyperRAM are dedicated pins */
+#define RZA2M_ENABLE_HYPERRAM
+
+
+/* Enable the 64MB SDRAM on the sub board */
+/* NOTE that the on-board USB-serial connection labeled "UART" will no longer
+ * work. Instead you must use SCIF-2 on the CN17 "CMOS" header as follows
+ *
+ * PE_1 = RxD2 (CN17-9)
+ * PE_2 = TxD2 (CN17-10)
+ *         GND (CN17-2)
+ *
+ * You must also change switch SW6_1 to "ON" to enable SDRAM bus
+ * You must also change switch SW6_3 to "ON to detach USB-serial from SDRAM bus
+ * You must also change switch SW6_4 to "OFF" to enable SCIF-1 on CN17
+ */
+//#define RZA2M_ENABLE_SDRAM
+
+#ifdef RZA2M_ENABLE_SDRAM
+ #undef SW6_1
+ #define SW6_1	SW_ON /* enable SDRAM bus */
+ #undef SW6_3
+ #define SW6_3	SW_ON /* detach USB-serial from SDRAM bus */
+ #undef SW6_4
+ #define SW6_4	SW_OFF /* enable SCIF-1 on CN17 */
+
+ #define SCIF_CONSOLE_BASE SCIF2_BASE	/* ## Select the SCIF channel ## */
+#endif
+
+
 /* Board Clock */
 #define CONFIG_SYS_CLK_FREQ	66000000 /* P1 clock frequency (XTAL=24MHz) */
 
@@ -61,7 +92,9 @@
 
 /* Serial Console */
 #define CONFIG_SCIF_CONSOLE		/* Enable Serial Console Driver */
+#ifndef SCIF_CONSOLE_BASE
 #define SCIF_CONSOLE_BASE SCIF4_BASE	/* ## Select the SCIF channel ## */
+#endif
 #define CONFIG_BAUDRATE		115200
 #define CONFIG_SYS_BAUDRATE_TABLE	{ CONFIG_BAUDRATE }
 

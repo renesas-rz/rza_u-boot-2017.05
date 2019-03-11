@@ -308,6 +308,10 @@ void HyperRAM_Init(void)
 
 int board_early_init_f(void)
 {
+#ifdef RZA2M_ENABLE_SDRAM
+	int i;
+#endif
+
 	/* This function runs early in the boot process, before u-boot is relocated
 	   to RAM (hence the '_f' in the function name stands for 'still running from
 	   flash'). A temporary stack has been set up for us which is why we can
@@ -352,11 +356,15 @@ int board_early_init_f(void)
 	/* Adjust for your board as needed. */
 
 	/* Serial Console */
-#if (SW6_1 != SW_OFF) || (SW6_3 != SW_OFF)
-	#error "Switch SW6 conflict: SCIF4 UART Pins not enabled. See top of file rza2mevb.h"
-#else
+#if (SCIF_CONSOLE_BASE == SCIF4_BASE)
 	pfc_set_pin_function(P9, 0, 4);	/* P9_0 = TxD4 */
 	pfc_set_pin_function(P9, 1, 4);	/* P9_1 = RxD4 */
+#endif
+
+	/* Serial Console (SCIF2 on CN17)*/
+#if (SCIF_CONSOLE_BASE == SCIF2_BASE)
+	pfc_set_pin_function(PE, 2, 3);	/* PE_2 = TxD2 */
+	pfc_set_pin_function(PE, 1, 3);	/* PE_1 = RxD2 */
 #endif
 
 	/* I2C 3 */
@@ -364,8 +372,9 @@ int board_early_init_f(void)
 	pfc_set_pin_function(PD, 7, 1);	/* PD_7 = SDA3 */
 
 	/* Ethernet */
-#if 1
-/** RMII mode **/
+#if (SW6_4 == SW_ON)
+	/** RMII mode **/
+	/* Ethernet */
 	/* Channel 0 */
 	pfc_set_pin_function(PE, 0, 7); /* REF50CK0 */
 	pfc_set_pin_function(P6, 1, 7); /* RMMI0_TXDEN */
@@ -377,7 +386,10 @@ int board_early_init_f(void)
 	pfc_set_pin_function(PE, 3, 7); /* RMII0_RXER */
 	pfc_set_pin_function(PE, 5, 1); /* ET0_MDC */
 	pfc_set_pin_function(PE, 6, 1); /* ET0_MDIO */
+#endif
 
+#if (SW6_5 == SW_ON)
+	/* Ethernet */
 	/* Channel 1 */
 	pfc_set_pin_function(PK, 3, 7); /* REF50CK1 */
 	pfc_set_pin_function(PK, 0, 7); /* RMMI1_TXDEN */
@@ -392,10 +404,7 @@ int board_early_init_f(void)
 #endif
 
 	/* SDRAM */
-#if (SW6_1 == SW_ON)
-#if (SW6_3 == SW_OFF)
-	#error "Switch SW6 conflict: SDRAM Pins not enabled. See top of file rza2mevb.h"
-#else
+#ifdef RZA2M_ENABLE_SDRAM
 	/* D0 - D15 */
 	for(i = 0; i <= 6; i++)
 		pfc_set_pin_function(P0, i, 1);	/* P0_0~6 = D0-D6 */
@@ -418,7 +427,6 @@ int board_early_init_f(void)
 	pfc_set_pin_function(P6, 7, 1);	/* P6_7 = WE0/DQMLL */
 	pfc_set_pin_function(P7, 0, 1);	/* P7_0 = WE1/DQMLU */
 #endif
-#endif
 
 	/* LED */
 	pfc_set_gpio(P6, 0, GPIO_OUT); /* P6_0 = GPIO_OUT */
@@ -426,40 +434,40 @@ int board_early_init_f(void)
 	//led_red_set_state(1);
 	//led_green_set_state(1);
 
+#ifdef RZA2M_ENABLE_HYPERRAM
 	/* Hyper RAM */
 	HyperRAM_Init();
-
+#endif
 
 /* NOTE: You can't use SDRAM and SCIF4 (serial console) at the same time because
          they share the same pins. */
 #if (SW6_1 == SW_ON)
 	/**********************************************/
-	/* Configure SDRAM (CS2, CS3)                 */
+	/* Configure SDRAM (CS3)                      */
 	/**********************************************/
-	/* Even if you are only using CS2, we need to set up
-	   the CS3 register CS3WCR because some bits are common for CS3 and CS2 */
 
-	#define CS2BCR_D	0x00004C00	/* Type=SDRAM, 16-bit memory */
-	#define CS2WCR_D	0x00000480	/* CAS Latency = 2 */
-	#define CS3BCR_D	0x00004C00	/* Type=SDRAM, 16-bit memory */
-	//#define CS3WCR_D	0x00004492	/*  */
-	#define CS3WCR_D	2 << 13	|	/* (CS2,CS3) WTRP (2 cycles) */\
-				1 << 10 |	/* (CS2,CS3) WTRCD (1 cycle) */\
-				1 <<  7 |	/*     (CS3) A3CL (CAS Latency = 2) */\
+	//#define CS2BCR_D	0x00004C00	/* (CS2) Type=SDRAM, 16-bit memory */
+	//#define CS2WCR_D	0x00000500	/* (CS2) CAS Latency = 2 */
+	#define CS3BCR_D	0x00004C00	/* (CS3) Type=SDRAM, 16-bit memory */
+	//#define CS3WCR_D	0x00002D13	/*  */
+	#define CS3WCR_D	1 << 13	|	/* (CS2,CS3) WTRP (1 cycles) */\
+				3 << 10 |	/* (CS2,CS3) WTRCD (3 cycles) */\
+				2 <<  7 |	/*     (CS3) A3CL (CAS Latency = 3) */\
 				2 <<  3 |	/* (CS2,CS3) TRWL (2 cycles) */\
-				2 <<  0		/* (CS2,CS3) WTRC (5 cycles) */
-	#define SDCR_D		0x00110811	/* 13-bit row, 9-bit col, auto-refresh */
+				3 <<  0		/* (CS2,CS3) WTRC (5 cycles) */
+	#define SDCR_D		0x00120812	/* 13-bit row, 10-bit col, auto-refresh */
 
 	/*
 	 * You must refresh all rows within the amount of time specified in the memory spec.
 	 * Total Refresh time =  [Number_of_rows] / [Clock_Source / Refresh Counter]
-	 * 63.0ms =  [8192] /  [(66.6MHz / 4) / 128]
+	 * 63.55ms =  [2^13] /  [(132MHz / 16) / 64]
 	 */
-	#define RTCOR_D		0xA55A0080	/* Refresh Counter = 128 */
-	#define RTCSR_D		0xA55A0008	/* Clock Source=CKIO/4 (CKIO=66MHz) */
+	/* SDRAM : 8K refresh cycles every 64ms */
+	#define RTCOR_D		0xA55A0040	/* Refresh Counter = 64 */
+	#define RTCSR_D		0xA55A0010	/* Clock Source=CKIO/16 (CKIO=132MHz) */
 
-	*(u32 *)CS2BCR = CS2BCR_D;
-	*(u32 *)CS2WCR = CS2WCR_D;
+	//*(u32 *)CS2BCR = CS2BCR_D;
+	//*(u32 *)CS2WCR = CS2WCR_D;
 	*(u32 *)CS3BCR = CS3BCR_D;
 	*(u32 *)CS3WCR = CS3WCR_D;
 	*(u32 *)SDCR = SDCR_D;
@@ -472,16 +480,31 @@ int board_early_init_f(void)
 		asm("nop");
 	}
 
+	/* AC Characteristics Adjustment Register (ACADJ) */
+	#define ACADJ 0x1F000090
+	*(u32 *)ACADJ = 0x0002000F;	/* fixed value */
+
 	/* The final step is to set the SDRAM Mode Register by written to a
 	   specific address (the data value is ignored) */
-	/* Check the hardware manual (table 8.15) if your settings differ */
+	/* Check the hardware manual (table 8.11) if your settings differ */
 	/*   Burst Length = 1 (fixed)
 	 *   Burst Type = Sequential (fixed)
-	 *   CAS Latency = 2 or 3 (see table 8.15)
+	 *   CAS Latency = 2 or 3 (see table 8.11)
 	 *   Write Burst Mode = [burst read/single write] or [burst read/burst write] (see table 8.15)
 	 */
-	#define SDRAM_MODE_CS2 0x3FFFD040	/* CS2: CAS=2, burst write, 16bit bus */
-	#define SDRAM_MODE_CS3 0x3FFFE040	/* CS3: CAS=2, burst write, 16bit bus */
+
+	//#define SDRAM_MODE_CS2 0x1F001440	/* CS2: CAS=2, single write, 16bit bus */
+	//#define SDRAM_MODE_CS3 0x1F002440	/* CS3: CAS=2, single write, 16bit bus */
+
+	//#define SDRAM_MODE_CS2 0x1F001460	/* CS2: CAS=3, single write, 16bit bus */
+	//#define SDRAM_MODE_CS3 0x1F002460	/* CS3: CAS=3, single write, 16bit bus */
+
+	//#define SDRAM_MODE_CS2 0x1F002040	/* CS2: CAS=2, burst write, 16bit bus */
+	//#define SDRAM_MODE_CS3 0x1F002040	/* CS3: CAS=2, burst write, 16bit bus */
+
+	#define SDRAM_MODE_CS2 0x1F002060	/* CS2: CAS=3, burst write, 16bit bus */
+	#define SDRAM_MODE_CS3 0x1F002060	/* CS3: CAS=3, burst write, 16bit bus */
+
 	*(u16 *)SDRAM_MODE_CS2 = 0;
 	*(u16 *)SDRAM_MODE_CS3 = 0;
 #endif
@@ -614,12 +637,12 @@ int board_late_init(void)
 	/* Default addresses */
 	#define DTB_ADDR_FLASH		"C0000"		/* Location of Device Tree in QSPI Flash (SPI flash offset) */
 	#define DTB_ADDR_RAM		"20500000"	/* Internal RAM location to copy Device Tree */
-	#define DTB_ADDR_SDRAM		"09800000"	/* External SDRAM location to copy Device Tree */
+	#define DTB_ADDR_SDRAM		"0D800000"	/* External SDRAM location to copy Device Tree */
 
 	#define MEM_ADDR_RAM		"0x20000000 0x00A00000"	/* System Memory for when using on-chip RAM (10MB) */
-	#define MEM_ADDR_SDRAM		"0x08000000 0x02000000"	/* System Memory for when using external SDRAM RAM (32MB) */
+	#define MEM_ADDR_SDRAM		"0x0C000000 0x04000000"	/* System Memory for when using external SDRAM RAM (64MB) */
 
-	#define KERNEL_ADDR_FLASH	"0x18200000"	/* Flash location of xipImage or uImage binary */
+	#define KERNEL_ADDR_FLASH	"0x20200000"	/* Flash location of xipImage or uImage binary */
 	#define UIMAGE_ADDR_SDRAM	"09000000"	/* Address to copy uImage to in external SDRAM */
 	#define UIMAGE_ADDR_SIZE	"0x400000"	/* Size of the uImage binary in Flash (4MB) */
 
@@ -653,8 +676,12 @@ int board_late_init(void)
 	setenv("xa_boot", "cp.b 200c0000 80300000 10000 ; qspi single ; bootx 20200000 80300000");
 
 	/* => run xsa_boot */
-	/* Boot XIP using external 32MB SDRAM, file system is AXFS, LCD FB fixed to internal RAM */
+	/* Boot XIP using external 64MB SDRAM, file system is AXFS, LCD FB fixed to internal RAM */
 	//setenv("xsa_boot", "run dtb_read_sdram dtb_mem_sdram dtb_lcdfb_fixed; setenv bootargs ${cmdline_common} ${fs_axfs}; fdt chosen; run xImg");
+	setenv("xsa_boot", "cp.b 200c0000 0C300000 10000 ; qspi single ; bootx 20200000 0C300000");
+
+	/* => run xha_boot */
+	/* Boot XIP using external 8MB HyperRAM, file system is AXFS, LCD FB fixed to internal RAM */
 	setenv("xha_boot", "cp.b 200c0000 40300000 10000 ; qspi single ; bootx 20200000 40300000");
 
 	/* => run s_boot */
