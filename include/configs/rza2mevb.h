@@ -54,7 +54,7 @@
  *
  * You must also change switch SW6_1 to "ON" to enable SDRAM bus
  * You must also change switch SW6_3 to "ON to detach USB-serial from SDRAM bus
- * You must also change switch SW6_4 to "OFF" to enable SCIF-1 on CN17
+ * You must also change switch SW6_4 to "OFF" to enable SCIF-2 on CN17
  */
 /*#define RZA2M_ENABLE_SDRAM*/
 
@@ -64,7 +64,7 @@
  #undef SW6_3
  #define SW6_3	SW_ON /* detach USB-serial from SDRAM bus */
  #undef SW6_4
- #define SW6_4	SW_OFF /* enable SCIF-1 on CN17 */
+ #define SW6_4	SW_OFF /* enable SCIF-2 on CN17 */
 
  #define SCIF_CONSOLE_BASE SCIF2_BASE	/* ## Select the SCIF channel ## */
 #endif
