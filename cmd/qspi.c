@@ -54,6 +54,11 @@ extern const struct spi_flash_info spi_flash_ids[];
 #define DMDMCR_0 (CONFIG_RZA_BASE_QSPI0 + 0x058)	/* SPI Mode Dummy Cycle Setting Register */
 #define DRDRENR_0 (CONFIG_RZA_BASE_QSPI0 + 0x05C)	/* Data Read DDR Enable Register */
 
+#define PHYCNT		(CONFIG_RZA_BASE_QSPI0 + 0x07C)	/* PHY Control Register */
+#define PHYOFFSET1	(CONFIG_RZA_BASE_QSPI0 + 0x080)	/* PHY Offset Register 1 */
+#define PHYOFFSET2	(CONFIG_RZA_BASE_QSPI0 + 0x084)	/* PHY Offset Register 2 */
+#define PHYADJ1 	(CONFIG_RZA_BASE_QSPI0 + 0x070)	/* PHY Adjustment Register 1 */
+#define PHYADJ2 	(CONFIG_RZA_BASE_QSPI0 + 0x074)	/* PHY Adjustment Register 2 */
 
 struct read_mode {
 	u8 cmd;
@@ -754,9 +759,37 @@ int do_qspi(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
 	asm("nop");
 	*(volatile u32 *)DRCR_0;	/* Read must be done after cache flush */
 
-	/* Do some dummy reads (our of order) to help clean things up */
+#ifdef CONFIG_RZA2
+	/* RZ/A2M Timing Adjustments */
+	if (ddr == 0) {
+		/* PHYOFFSET1:DDRTMG = b'11 */
+		*(volatile u32 *)PHYOFFSET1 |= 3 << 28;
+
+		/* For SDR, sequence in Figure 20.28(1) */
+		*(volatile u32 *)PHYADJ2 = 0xA5390000;
+		*(volatile u32 *)PHYADJ1 = 0x80000000;
+		*(volatile u32 *)PHYADJ2 = 0x00008080;
+		*(volatile u32 *)PHYADJ1 = 0x80000022;
+		*(volatile u32 *)PHYADJ2 = 0x00008080;
+		*(volatile u32 *)PHYADJ1 = 0x80000024;
+		*(volatile u32 *)PHYCNT |= 3 << 16;	/* PHYCNT.CKSEL[1:0] to “11” */
+		*(volatile u32 *)PHYADJ2 = 0x00000000;
+		*(volatile u32 *)PHYADJ1 = 0x80000032;
+	} else {
+		/* For DDR, sequence Figure 20.28(2) */
+		printf("ERROR: RZ/A2M timing not implemented yet\n");
+	}
+
+	/* Do some dummy reads (out of order) to help clean things up */
+	*(volatile u32 *)0x20000010;
+	*(volatile int *)0x20000000;
+#endif
+
+#ifdef CONFIG_RZA1
+	/* Do some dummy reads (out of order) to help clean things up */
 	*(volatile u32 *)0x18000010;
 	*(volatile int *)0x18000000;
+#endif
 
 	printf("New Mode: ");
 	cmd = (*(volatile long *)DRCMR_0 >> 16) & 0xFF;
