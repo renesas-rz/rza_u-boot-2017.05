@@ -226,6 +226,13 @@
 #define CONFIG_SERVERIP		192.168.0.1
 #endif
 
+/* SD/MMC */
+#define CONFIG_CMD_MMC			1
+#define CONFIG_MMC			1
+#define CONFIG_GENERIC_MMC		1
+#define CONFIG_SH_SDHI			1
+#define CONFIG_SH_SDHI_FREQ		(CONFIG_SYS_CLK_FREQ*2) /* B clk */
+
 /* USB host controller */
 
 /*

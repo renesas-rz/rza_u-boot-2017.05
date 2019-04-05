@@ -44,6 +44,11 @@ void pfc_set_pin_function(u8 port, u8 pin, u8 func);
 #define CONFIG_SH_I2C_BASE2		0xE803A800
 #define CONFIG_SH_I2C_BASE3		0xE803AC00
 
+/* SDHI/MMC bases */
+#define CONFIG_SYS_SH_SDHI_NR_CHANNEL	2
+#define CONFIG_SYS_SH_SDHI0_BASE	0xE8228000 /* ch 0 */
+#define CONFIG_SYS_SH_SDHI1_BASE	0xE822A000 /* ch 1 */
+
 /* QSPI bases */
 #define CONFIG_RZA2_BASE_QSPI0		0x1F800000
 

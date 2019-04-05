@@ -289,8 +289,8 @@ void HyperRAM_Init(void)
 	*(volatile u32 *)PPOC =
 			1 * (1 << 9) |	/* POCSEL1 (1=POC1 is valid) */
 			1 * (1 << 8) |	/* POCSEL0 (1=POC0 is valid) */
-			0 * (1 << 3) |	/* POC3 SDMMC1 (0=1.8v, 1=3.3v) */
-			0 * (1 << 2) |	/* SDMMC0 (0=1.8v, 1=3.3v) */
+			1 * (1 << 3) |	/* POC3 SDMMC1 (0=1.8v, 1=3.3v) */
+			1 * (1 << 2) |	/* SDMMC0 (0=1.8v, 1=3.3v) */
 			0 * (1 << 1) |	/* POC1 Hyper (0=1.8v, 1=3.3v) */
 			1 * (1 << 0);	/* POC0 QSPI (0=1.8v, 1=3.3v) */
 
@@ -402,6 +402,16 @@ int board_early_init_f(void)
 	pfc_set_pin_function(P3, 3, 1); /* ET1_MDC */
 	pfc_set_pin_function(P3, 4, 1); /* ET1_MDIO */
 #endif
+
+	/* SD/MMC Channel 0 */
+	/* Socket on CPU board */
+	pfc_set_pin_function(P5, 0, 3); /* SD0_CD */
+	pfc_set_pin_function(P5, 1, 3); /* SD0_WP */
+
+	/* SD/MMC Channel 1 */
+	/* Socket on sub board */
+	pfc_set_pin_function(P5, 4, 3); /* SD1_CD */
+	pfc_set_pin_function(P5, 5, 3); /* SD1_WP */
 
 	/* SDRAM */
 #ifdef RZA2M_ENABLE_SDRAM
@@ -530,14 +540,13 @@ int board_eth_init(bd_t *bis)
 int board_mmc_init(bd_t *bis)
 {
 	int ret = 0;
-#ifdef CONFIG_SH_MMCIF
-	ret = mmcif_mmc_init();
-#endif
+	ret |= sh_sdhi_init(CONFIG_SYS_SH_SDHI0_BASE,
+			    0,
+			    SH_SDHI_QUIRK_64BIT_BUF);
+	ret |= sh_sdhi_init(CONFIG_SYS_SH_SDHI1_BASE,
+			    1,
+			    SH_SDHI_QUIRK_64BIT_BUF);
 
-#ifdef CONFIG_SH_SDHI
-	ret = sh_sdhi_init(CONFIG_SYS_SH_SDHI1_BASE, RZ_SDHI_CHANNEL,
-			   SH_SDHI_QUIRK_32BIT_BUF);
-#endif
 	return ret;
 }
 
