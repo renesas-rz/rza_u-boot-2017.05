@@ -10,13 +10,24 @@
 #define CONFIG_MACH_TYPE			0xFFFFFFFF /* Boot Linux using Device Tree */
 
 /* Board Clock */
-#define CONFIG_SYS_CLK_FREQ	66666666 /* P1 clock frequency (XTAL=13.33MHz) */
+#define CONFIG_SYS_CLK_FREQ	66000000 /* P1 clock frequency (XTAL=24MHz) */
 
 /* Set all system clocks to full speed */
 /* On reset, the CPU will be running at 1/2 speed */
-/* In the Hardware Manual, see Table 6.3 Settable Frequency Ranges */
-#define FRQCR_D		0x0035	/* CPU= 300-400 MHz */
-#define FRQCR2_D	0x0001	/* Image Processing clock full speed (RZ/A1M and RZ/A1H only) */
+/* In the Hardware Manual, see Table 6.4 Settable Frequency Ranges */
+#define FRQCR_D		0x1012
+	/* PLL(x88), I:G:B:P1:P0 = 22:11:5.5:2.75:1.375 */
+	/* CKIO:Output at time usually,                 */
+	/* Output when bus right is opened,             */
+	/* output at standby"L"                         */
+	/* Clockin  = 24MHz,                            */
+	/* I  Clock = 528MHz,                           */
+	/* G  Clock = 264MHz                            */
+	/* B  Clock = 132MHz,                           */
+	/* P1 Clock = 66MHz,                            */
+	/* P0 Clock = 33MHz                             */
+
+#define CKIOSEL_D	0x0000; /* CKIO Output = B Clock  */
 
 /* Serial Console */
 #define CONFIG_SCIF_CONSOLE		/* Enable Serial Console Driver */
@@ -39,13 +50,13 @@
 /* Internal RAM Size */
 /*
  * u-boot will be relocated to internal RAM during boot.
- * RZ/A1=3M, RZ/A1M=5M, RZ/A1H=10M)
+ * RZ/A2M = 4MB
  */
-#define CONFIG_SYS_SDRAM_BASE		0x20000000
-#define CONFIG_SYS_SDRAM_SIZE		(10 * 1024 * 1024)
+#define CONFIG_SYS_SDRAM_BASE		0x80000000
+#define CONFIG_SYS_SDRAM_SIZE		(4 * 1024 * 1024)
 #define CONFIG_SYS_INIT_SP_ADDR         (CONFIG_SYS_SDRAM_BASE + CONFIG_SYS_SDRAM_SIZE - 1*1024*1024)
-#define _HIDE_CONFIG_SYS_INIT_SP_ADDR         0x20300000 /* Internal RAM @ 3MB */
-#define	_HIDE_CONFIG_LOADADDR			CONFIG_SYS_SDRAM_BASE	/* default load address */
+#define _HIDE_CONFIG_SYS_INIT_SP_ADDR         0x80400000 /* Internal RAM @ 4MB (not used) */
+#define	_HIDE_CONFIG_LOADADDR			CONFIG_SYS_SDRAM_BASE	/* default load address (not used) */
 #define CONFIG_SYS_LOAD_ADDR		(CONFIG_SYS_SDRAM_BASE + 4*1024*1024)
 
 #define CONFIG_NR_DRAM_BANKS		1	/* must be set to 1 */
@@ -55,27 +66,18 @@
 /*
  * You can choose to boot from:
  * 1. QSPI flash                  (base address = 0x18000000)
- * 2. Parallel NOR Flash          (base address = 0x00000000)
- * 3. RAM (pre-loaded with JTAG)  (base address = 0x20020000)
+ * 2.
+ * 3. RAM (pre-loaded with JTAG)  (base address = 0x80020000)
  */
 #define BOOT_MODE 1	/* << MAKE YOUR SELECTION HERE >> */
 
 
 /* QSPI Flash Boot */
 #if (BOOT_MODE == 1)
-  #define CONFIG_SYS_TEXT_BASE		0x18000000
+  #define CONFIG_SYS_TEXT_BASE		0x20000000
   #define CONFIG_ENV_IS_IN_SPI_FLASH
   #define CONFIG_ENV_OFFSET		0x80000
-  #define CONFIG_ENV_SECT_SIZE		0x40000		/* smallest erase sector size */
-  #define CONFIG_ENV_SIZE		CONFIG_ENV_SECT_SIZE
-  #define CONFIG_ENV_ADDR		(CONFIG_SYS_FLASH_BASE + CONFIG_ENV_OFFSET)
-
-/* Parallel NOR Flash Boot */
-#elif (BOOT_MODE == 2)
-  #define CONFIG_SYS_TEXT_BASE		0x00000000
-  #define CONFIG_ENV_IS_IN_FLASH
-  #define CONFIG_ENV_OFFSET		(512 * 1024)
-  #define CONFIG_ENV_SECT_SIZE		(256 * 1024)
+  #define CONFIG_ENV_SECT_SIZE		0x10000		/* smallest erase sector size */
   #define CONFIG_ENV_SIZE		CONFIG_ENV_SECT_SIZE
   #define CONFIG_ENV_ADDR		(CONFIG_SYS_FLASH_BASE + CONFIG_ENV_OFFSET)
 
@@ -85,7 +87,7 @@
  * in order to be used to program QSPI flash for the first time.
  */
 #elif (BOOT_MODE == 3)
-  #define CONFIG_SYS_TEXT_BASE		0x20020000
+  #define CONFIG_SYS_TEXT_BASE		0x80020000
   #define CONFIG_ENV_IS_NOWHERE		/* Store ENV in RAM memory only */
   #define CONFIG_ENV_SIZE		0x1000
 
@@ -99,7 +101,7 @@
 #define CONFIG_ENV_OVERWRITE	1
 
 /* Malloc */
-#define CONFIG_SYS_MALLOC_LEN		(512 * 1024)
+#define CONFIG_SYS_MALLOC_LEN		(256 * 1024)
 #define CONFIG_SYS_MONITOR_LEN		(128 * 1024)
 
 /* Kernel Boot */
@@ -110,7 +112,9 @@
  * Device Drivers > SPI Flash Support > Legacy SPI Flash Interface support
  */
 #define CONFIG_SPI_FLASH_SPANSION
+#define CONFIG_SPI_FLASH_MACRONIX
 #define CONFIG_SPI_FLASH_BAR		/* For SPI Flash bigger than 16MB */
+
 
 /* SECT_NOR_FLASH */
 /* Parallel NOR Flash */
@@ -157,35 +161,14 @@
 #define CONFIG_SERVERIP		192.168.0.1
 /* SECT_ETHERNET_END */
 
-/* SECT_USB_HOST */
-/* USB host controller */
-#define CONFIG_USB_R8A66597_HCD
-#define R8A66597_BASE0			0xE8010000	/* USB0 */
-#define R8A66597_BASE1			0xE8207000	/* USB1 */
-#define CONFIG_R8A66597_BASE_ADDR	R8A66597_BASE1
-#define CONFIG_R8A66597_XTAL		0x0000	/* 0=48MHz USB_X1, 1=12MHz EXTAL*/
-#define CONFIG_R8A66597_ENDIAN		0x0000	/* 0=little */
-/* SECT_USB_HOST_END */
-
-/* SECT_SH_MMC */
-/* SH-MMC */
+/* SECT_SDMMC */
+/* SD/MMC */
+#define CONFIG_CMD_MMC			1
 #define CONFIG_MMC			1
-#define CONFIG_CMD_MMC
 #define CONFIG_GENERIC_MMC		1
-#define CONFIG_SH_MMCIF			1
-#define CONFIG_SH_MMCIF_ADDR		0xE804C800
-#define CONFIG_SH_MMCIF_CLK CONFIG_SYS_CLK_FREQ
-/* SECT_SH_MMC_END */
-
-/* SECT_SH_SDHI */
-/* SH-SDHI */
-#define CONFIG_MMC			1
-#define CONFIG_CMD_MMC
-#define CONFIG_GENERIC_MMC		1
-#define CONFIG_SH_SDHI
-#define CONFIG_SH_SDHI_FREQ	(CONFIG_SYS_CLK_FREQ/2) /* 1/2 P1 clk */
-#define RZ_SDHI_CHANNEL			1
-/* SECT_SH_SDHI_END */
+#define CONFIG_SH_SDHI			1
+#define CONFIG_SH_SDHI_FREQ		(CONFIG_SYS_CLK_FREQ*2) /* B clk */
+/* SECT_SDMMC_END */
 
 /*
  * Lowlevel configuration
@@ -195,15 +178,17 @@
 #define WTCNT_D		0x5A00
 
 /* Enable all peripheral clocks */
-#define STBCR3_D	0x00000000
-#define STBCR4_D	0x00000000
-#define STBCR5_D	0x00000000
-#define STBCR6_D	0x00000000
-#define STBCR7_D	0x00000024
-#define STBCR8_D	0x00000005
-#define STBCR9_D	0x00000000
-#define STBCR10_D	0x00000000
-#define STBCR11_D	0x000000c0
-#define STBCR12_D	0x000000f0
+#define STBCR2_D	0x6A
+#define STBCR3_D	0x80 /* OSTM0, OSTM1, OSTM3, MTU3, CAN-FD, ADC, GPT */
+#define STBCR4_D	0x00 /* SCIF0, SCIF1, SCIF2, SCIF3, SCIF4, SCI0, SCI1,IrDA */
+#define STBCR5_D	0x31 /* A/D, CEU, RTC0, RTC1, JCU */
+#define STBCR6_D	0x80 /* VIN, ETHER0, ETHER1, EtherPTR, EtherM, USB0, USB1 */
+#define STBCR7_D	0x10 /* IMR-LS2, DAVE-2D, MIPI, SSIF0, SSIF1, SSIF2, SSIF3  */
+#define STBCR8_D	0x05 /* IIC0, IIC1, IIC2, IIC3, SPIBSC, VDC6 */
+#define STBCR9_D	0x10 /* RSPI0, RSPI1, RSPI2, HYPER, OCTA, SPDIF, DRP */
+#define STBCR10_D	0x00 /* TSIP, SDHI00, SDHI01, SDHI10, SDHI11 */
+#define STBCR11_D	0x3F /* POE3, POEG */
+
+
 
 #endif	/* __RZATEMPLATE_H */

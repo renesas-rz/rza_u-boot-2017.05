@@ -53,3 +53,31 @@ source "board/renesas/ylcdrza1h/Kconfig"
 
 endif
 
+if RZA2
+
+config R7S9210
+	bool
+	default y
+
+choice
+	prompt "Renesas RZ/A2 board select"
+
+# Renesas Supported Boards
+config TARGET_RZA2MEVB
+	bool "RZ/A2M EVB board"
+	select BOARD_LATE_INIT
+
+# ENTER YOUR CUSTOM BOARD BELOW HERE TO AVOID MERGE CONFLICTS (TAG_TARGET_A2)
+
+
+endchoice
+
+config SYS_SOC
+	default "rmobile"
+
+# Renesas Supported Boards
+source "board/renesas/rza2mevb/Kconfig"
+
+# ENTER YOUR CUSTOM BOARD BELOW HERE TO AVOID MERGE CONFLICTS (TAG_KCONFIG_A2)
+
+endif

@@ -1,6 +1,5 @@
 /*
  * Copyright (C) 2017 Renesas Electronics
- * Copyright (C) Chris Brandt
  *
  * This file is released under the terms of GPL v2 and any later version.
  * See the file COPYING in the root directory of the source tree for details.
@@ -26,7 +25,7 @@ static const struct sh_serial_platdata serial_platdata = {
 	.type = PORT_SCIF,
 	.clk = CONFIG_SYS_CLK_FREQ,		/* P1 Clock */
 };
-U_BOOT_DEVICE(rza1template_serial) = {
+U_BOOT_DEVICE(rzatemplate_serial) = {
 	.name = "serial_sh",
 	.platdata = &serial_platdata,
 };
@@ -182,7 +181,7 @@ int board_early_init_f(void)
 	*(u32 *)CS1BCR = CS1BCR_D;
 #endif
 
-#if 0 /* Have SDRAM? */
+#if 0 /* SECT_SDRAM */
 	/**********************************************/
 	/* Configure SDRAM (CS2, CS3)                 */
 	/**********************************************/
@@ -234,7 +233,7 @@ int board_early_init_f(void)
 	#define SDRAM_MODE_CS3 0x3FFFE040	/* CS3: CAS=2, burst write, 16bit bus */
 	*(u16 *)SDRAM_MODE_CS2 = 0;
 	*(u16 *)SDRAM_MODE_CS3 = 0;
-#endif /* Have SDRAM? */
+#endif /* SECT_SDRAM_END */
 
 	return 0;
 }
@@ -282,56 +281,46 @@ int board_late_init(void)
 #endif
 
 	/* Default addresses */
-	#define DTB_ADDR_FLASH		"C0000"		/* Location of Device Tree in QSPI Flash (SPI flash offset) */
-	#define DTB_ADDR_RAM		"20500000"	/* Internal RAM location to copy Device Tree */
-	#define DTB_ADDR_SDRAM		"09800000"	/* External SDRAM location to copy Device Tree */
-
-	#define MEM_ADDR_RAM		"0x20000000 0x00A00000"	/* System Memory for when using on-chip RAM (10MB) */
-	#define MEM_ADDR_SDRAM		"0x08000000 0x02000000"	/* System Memory for when using external SDRAM RAM (32MB) */
+	#define DTB_ADDR_FLASH		"0x180C0000"	/* Location of Device Tree in QSPI Flash */
+	#define DTB_ADDR_RAM		"0x20500000"	/* Internal RAM location to copy Device Tree */
+	#define DTB_ADDR_SDRAM		"0x0D800000"	/* External SDRAM location to copy Device Tree */
 
 	#define KERNEL_ADDR_FLASH	"0x18200000"	/* Flash location of xipImage or uImage binary */
-	#define UIMAGE_ADDR_SDRAM	"09000000"	/* Address to copy uImage to in external SDRAM */
+	#define UIMAGE_ADDR_SDRAM	"0x0D000000"	/* Address to copy uImage to in external SDRAM */
 	#define UIMAGE_ADDR_SIZE	"0x400000"	/* Size of the uImage binary in Flash (4MB) */
 
 
-	/* Default kernel command line options */
-	setenv("cmdline_common", "ignore_loglevel earlyprintk earlycon");
-
-	/* Root file system choices */
-	setenv("fs_axfs", "rootfstype=axfs rootflags=physaddr=0x18800000");
-	setenv("fs_mtd",  "root=/dev/mtdblock0");
-
-	/* LCD Frame buffer location */
-	setenv("dtb_lcdfb_fixed", "fdt set /display@fcff7400 fb_phys_addr <0x60000000>");	/* Fixed address */
-	setenv("dtb_lcdfb_dyn",   "fdt set /display@fcff7400 fb_phys_addr <0x00000000>");	/* Dynamically allocate during boot */
-
-	/* Read DTB from Flash into either internal on-chip RAM or external SDRAM */
-	setenv("dtb_read_ram",   "sf probe 0; sf read "DTB_ADDR_RAM" "DTB_ADDR_FLASH" 8000; fdt addr "DTB_ADDR_RAM" ; setenv addr_dtb "DTB_ADDR_RAM"");
-	setenv("dtb_read_sdram", "sf probe 0; sf read "DTB_ADDR_SDRAM" "DTB_ADDR_FLASH" 8000; fdt addr "DTB_ADDR_SDRAM" ; setenv addr_dtb "DTB_ADDR_SDRAM"");
-
-	/* Set the system memory address and size. This overrides the setting in Device Tree */
-	setenv("dtb_mem_ram",   "fdt memory "MEM_ADDR_RAM"");		/* Use internal RAM for system memory */
-	setenv("dtb_mem_sdram", "fdt memory "MEM_ADDR_SDRAM"");		/* Use external SDRAM for system memory */
-
 	/* Kernel booting operations */
-	setenv("xImg", "qspi dual; setenv cmd bootx "KERNEL_ADDR_FLASH" ${addr_dtb}; run cmd");	/* Boot a XIP Kernel */
-	setenv("uImg", "qspi dual; cp.b "KERNEL_ADDR_FLASH" "UIMAGE_ADDR_SDRAM" "UIMAGE_ADDR_SIZE"; bootm start "UIMAGE_ADDR_SDRAM" - "DTB_ADDR_SDRAM"; bootm loados ; bootm go");	/* Boot a uImage kernel */
 
 	/* => run xa_boot */
-	/* Boot XIP using internal RAM only, file system is AXFS, LCD dynamically allocated */
-	setenv("xa_boot", "run dtb_read_ram dtb_mem_ram dtb_lcdfb_dyn; setenv bootargs ${cmdline_common} ${fs_axfs}; fdt chosen; run xImg");
+	/* Boot XIP using internal RAM only, file system is AXFS
+	 * 1. Enable full XIP QSPI operation
+	 * 2. Copy Device Tree from QSPI to Internal RAM
+	 * 3. Boot XIP kernel */
+	setenv("xa_boot",	"qspi single ; "
+				"cp.b " DTB_ADDR_FLASH " " DTB_ADDR_RAM " 10000 ; "
+				"bootx " KERNEL_ADDR_FLASH " " DTB_ADDR_RAM);
 
 	/* => run xsa_boot */
-	/* Boot XIP using external 32MB SDRAM, file system is AXFS, LCD FB fixed to internal RAM */
-	setenv("xsa_boot", "run dtb_read_sdram dtb_mem_sdram dtb_lcdfb_fixed; setenv bootargs ${cmdline_common} ${fs_axfs}; fdt chosen; run xImg");
+	/* Boot XIP using external 64MB SDRAM, file system is AXFS, LCD FB fixed to internal RAM
+	 * 1. Enable full XIP QSPI operation
+	 * 2. Copy Device Tree from QSPI to SDRAM
+	 * 3. Boot XIP kernel */
+	setenv("xsa_boot",	"qspi single ; "
+				"cp.b " DTB_ADDR_FLASH " " DTB_ADDR_SDRAM " 10000 ; "
+				"bootx " KERNEL_ADDR_FLASH " " DTB_ADDR_SDRAM);
 
-	/* => run s_boot */
-	/* Boot SDRAM uImage using external 32MB SDRAM, file system is squashfs, LCD FB fixed to internal RAM */
-	setenv("s_boot", "run dtb_read_sdram dtb_mem_sdram dtb_lcdfb_fixed; setenv bootargs ${cmdline_common} ${fs_mtd}; fdt chosen; run uImg");
 
-	/* => run sa_boot */
-	/* Boot SDRAM uImage using external 32MB SDRAM, file system is AXFS, LCD FB fixed to internal RAM */
-	setenv("sa_boot", "run dtb_read_sdram dtb_mem_sdram dtb_lcdfb_fixed; setenv bootargs ${cmdline_common} ${fs_axfs}; fdt chosen; run uImg");
+	/* => run u_boot */
+	/* Boot SDRAM uImage using external 64MB SDRAM, file system is squashfs, LCD FB fixed to internal RAM
+	 * 1. Enable full XIP QSPI operation
+	 * 2. Copy Device Tree from QSPI to SDRAM
+	 * 3. Copy uImage kernel from QSPI to SDRAM
+	 * 4. Decompress uImage and boot kernel */
+	setenv("u_boot",	"qspi single ; "
+				"cp.b " DTB_ADDR_FLASH " " DTB_ADDR_SDRAM " 10000 ; "
+				"cp.b " KERNEL_ADDR_FLASH " " UIMAGE_ADDR_SDRAM " " UIMAGE_ADDR_SIZE " ; "
+				"bootm start " UIMAGE_ADDR_SDRAM " - " DTB_ADDR_SDRAM "; bootm loados ; bootm go");
 
 	return 0;
 }

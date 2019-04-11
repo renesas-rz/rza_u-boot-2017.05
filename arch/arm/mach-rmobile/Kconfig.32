@@ -95,26 +95,3 @@ source "board/renesas/stout/Kconfig"
 
 endif
 
-if RZA2
-
-config R7S9210
-	bool
-	default y
-
-choice
-	prompt "Renesas RZ/A2 board select"
-
-# Renesas Supported Boards
-config TARGET_RZA2MEVB
-	bool "RZ/A2M EVB board"
-	select BOARD_LATE_INIT
-
-endchoice
-
-config SYS_SOC
-	default "rmobile"
-
-# Renesas Supported Boards
-source "board/renesas/rza2mevb/Kconfig"
-
-endif
