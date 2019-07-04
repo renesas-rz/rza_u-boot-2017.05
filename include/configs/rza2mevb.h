@@ -216,7 +216,11 @@
 /* Network interface */
 #if (SW6_4 == SW_ON) || (SW6_5 == SW_ON)
 #define CONFIG_SH_ETHER
+#if (SW6_4 == SW_ON)
 #define CONFIG_SH_ETHER_USE_PORT	0
+#else
+#define CONFIG_SH_ETHER_USE_PORT	1
+#endif
 #define CONFIG_SH_ETHER_PHY_ADDR	0
 #define CONFIG_SH_ETHER_PHY_MODE PHY_INTERFACE_MODE_MII
 #define CONFIG_PHYLIB
