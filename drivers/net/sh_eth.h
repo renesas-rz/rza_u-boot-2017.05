@@ -366,8 +366,13 @@ static const u16 sh_eth_offset_fast_sh4[SH_ETH_MAX_REGISTER_OFFSET] = {
 #define BASE_IO_ADDR	0xE8203000
 #elif defined(CONFIG_R7S9210)
 #define SH_ETH_TYPE_RZ
-#define BASE_IO_ADDR	0xE8204000	/* EDMAC0 + ETHERC0 */
-//#define BASE_IO_ADDR	0xE8204200	/* EDMAC1 + ETHERC1 */
+#define BASE_IO_ADDR	0xE8204000
+#endif
+
+#if defined(CONFIG_R7S9210)
+#define PORT_OFFSET	0x200
+#else
+#define PORT_OFFSET	0x800
 #endif
 
 /*
@@ -674,7 +679,7 @@ static inline unsigned long sh_eth_reg_addr(struct sh_eth_dev *eth,
 #else
 #error
 #endif
-	return BASE_IO_ADDR + reg_offset[enum_index] + 0x800 * eth->port;
+	return BASE_IO_ADDR + reg_offset[enum_index] + PORT_OFFSET * eth->port;
 }
 
 static inline void sh_eth_write(struct sh_eth_dev *eth, unsigned long data,
