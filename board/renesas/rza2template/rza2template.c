@@ -286,7 +286,7 @@ int board_early_init_f(void)
 	for(i = 0; i <= 4; i++)
 		pfc_set_pin_function(P1, i, 1);	/* P1_0~4 = D7-D11 */
 	for(i = 0; i <= 3; i++)
-		pfc_set_pin_function(P2, i, 1);	/* P1_0~3 = D12-D15 */
+		pfc_set_pin_function(P2, i, 1);	/* P2_0~3 = D12-D15 */
 
 	/* A1 - A15 */
 	for(i=1;i<=7;i++)
@@ -371,10 +371,10 @@ int board_early_init_f(void)
 	//#define SDRAM_MODE_CS2 0x1F001460	/* CS2: CAS=3, single write, 16bit bus */
 	//#define SDRAM_MODE_CS3 0x1F002460	/* CS3: CAS=3, single write, 16bit bus */
 
-	//#define SDRAM_MODE_CS2 0x1F002040	/* CS2: CAS=2, burst write, 16bit bus */
+	//#define SDRAM_MODE_CS2 0x1F001040	/* CS2: CAS=2, burst write, 16bit bus */
 	//#define SDRAM_MODE_CS3 0x1F002040	/* CS3: CAS=2, burst write, 16bit bus */
 
-	#define SDRAM_MODE_CS2 0x1F002060	/* CS2: CAS=3, burst write, 16bit bus */
+	#define SDRAM_MODE_CS2 0x1F001060	/* CS2: CAS=3, burst write, 16bit bus */
 	#define SDRAM_MODE_CS3 0x1F002060	/* CS3: CAS=3, burst write, 16bit bus */
 
 	*(u16 *)SDRAM_MODE_CS2 = 0;
