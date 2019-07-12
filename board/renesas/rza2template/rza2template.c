@@ -205,11 +205,6 @@ int board_early_init_f(void)
 	/* Ensures completion of the invalidate operation */
 	PL310_REG(REG7_CACHE_SYNC) = 0x00000000uL;
 
-	/* ==== Enable L2 cache ==== */
-	PL310_REG(REG2_INT_CLEAR) = 0x000001FFuL;	/* Clear the reg2_int_raw_status register */
-	PL310_REG(REG9_D_LOCKDOWN0) = 0x00000000uL;
-	PL310_REG(REG1_CONTROL) = 0x00000001uL;		/* Enable L2 cache */
-
 	/* =========== Pin Setup =========== */
 	/* Adjust for your board as needed. */
 
