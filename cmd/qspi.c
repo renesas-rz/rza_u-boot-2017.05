@@ -46,6 +46,7 @@ extern const struct spi_flash_info spi_flash_ids[];
 #endif
 
 #define CMNCR_0	(CONFIG_RZA_BASE_QSPI0 + 0x000)	/* Common control register */
+#define SSLDR_0 (CONFIG_RZA_BASE_QSPI0 + 0x004)	/* SSL Delay register */
 #define DRCR_0	(CONFIG_RZA_BASE_QSPI0 + 0x00C)	/* Data Read Control Register */
 #define DRCMR_0	(CONFIG_RZA_BASE_QSPI0 + 0x010)	/* Data Read Command Setting Register */
 #define DREAR_0 (CONFIG_RZA_BASE_QSPI0 + 0x014)	/* Data read extended address setting register */
@@ -721,9 +722,12 @@ int do_qspi(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
 	}
 
 	if ( ddr ) {
-		printf( "WARNING: DDR mode doesn't actually work yet on the RSKRZA1 board.\n"
-			"   The Spansion SPI flash has an extra phase in the command stream\n"
-			"   that we can't account for.\n");
+#if defined(CONFIG_RZA1)
+		if (strcmp(CONFIG_ARCH_RMOBILE_BOARD_STRING, "RSKRZA1"))
+			printf( "WARNING: DDR mode doesn't actually work yet on the RSKRZA1 board.\n"
+				"   The Spansion SPI flash has an extra phase in the command stream\n"
+				"   that we can't account for.\n");
+#endif
 
 		/* Set read cmd to Read DDR Quad I/O */
 		drcmr = (u32)QUAD_IO_DDR_READ << 16;
@@ -760,6 +764,9 @@ int do_qspi(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
 	*(volatile u32 *)DRCR_0;	/* Read must be done after cache flush */
 
 #ifdef CONFIG_RZA2
+	/* Remove SSL delay to improve performance */
+	*(volatile u32 *)SSLDR_0 = 0;
+
 	/* RZ/A2M Timing Adjustments */
 	if (ddr == 0) {
 		/* PHYOFFSET1:DDRTMG = b'11 */
@@ -776,8 +783,10 @@ int do_qspi(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
 		*(volatile u32 *)PHYADJ2 = 0x00000000;
 		*(volatile u32 *)PHYADJ1 = 0x80000032;
 	} else {
-		/* For DDR, sequence Figure 20.28(2) */
-		printf("ERROR: RZ/A2M timing not implemented yet\n");
+		/* PHYCNT:PHYMEM = b'01 */
+		*(volatile u32 *)PHYCNT = (*(volatile u32 *)PHYCNT & ~0x3) | 0x1;
+		/* PHYOFFSET1:DDRTMG = b'10 */
+		*(volatile u32 *)PHYOFFSET1 = (*(volatile u32 *)PHYOFFSET1 & ~0x30000000) | 0x2 << 28;
 	}
 
 	/* Do some dummy reads (out of order) to help clean things up */
