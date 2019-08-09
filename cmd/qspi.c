@@ -11,6 +11,8 @@
 #include <spi.h>
 #include <spi_flash.h>
 
+DECLARE_GLOBAL_DATA_PTR;
+
 static int in_xip_mode = 0xff;
 
 
@@ -501,6 +503,125 @@ int qspi_reset_device(struct spi_flash *sf)
 	return ret;
 }
 
+#ifdef CONFIG_RZA2
+
+/* PHY Adjust */
+typedef struct r_drv_spibsc_phy_adj_t
+{
+    u8 xy; /* PHYADJ2 */
+    u8 zz; /* PHYCNT cksel */
+} st_r_drv_spibsc_phy_adj_t;
+static const st_r_drv_spibsc_phy_adj_t gs_spibsc_phy_adj[13] =
+{
+	/*<xy>  <zz> */
+	{ 0x01, 0x3 },    /*   0 */
+	{ 0x11, 0x3 },    /*   1 */
+	{ 0x01, 0x2 },    /*   2 */
+	{ 0x11, 0x2 },    /*   3 */
+	{ 0x01, 0x1 },    /*   4 */
+	{ 0x00, 0x3 },    /*   5 */
+	{ 0x10, 0x3 },    /*   6 */
+	{ 0x00, 0x2 },    /*   7 */
+	{ 0x10, 0x2 },    /*   8 */
+	{ 0x00, 0x1 },    /*   9 */
+	{ 0x10, 0x1 },    /*  10 */
+	{ 0x00, 0x0 },    /*  11 */
+	{ 0x10, 0x0 },    /*  12 */
+};
+
+#define TEST_VALUE (0xAA00FF55uL)
+const u32 test_pattern = TEST_VALUE;
+u8 timing_adj_calc(void)
+{
+	u32 *fixed_data_addr = (void *)((u32)&test_pattern - (u32)gd->relocaddr) + 0x20000000;
+	u32 phycnt;
+	u32 test_value;
+	int i;
+	u8 index_start;
+	u8 ok_cnt;
+	u8 tm_adj_index;
+	u8 results[13];	/* 0=bad, 1=good */
+
+	/* Perform the procedure shown in Figure 20.28 in the RZ/A2M
+	 * Hardware Manual. */
+
+	/* Enable access to registers of the PHY module */
+	*(volatile u32 *)PHYADJ2 = 0xA5390000;
+	*(volatile u32 *)PHYADJ1 = 0x80000000;
+
+	/* Set PHY Timing Adjust Reg. */
+	*(volatile u32 *)PHYADJ2 = 0x00009191;
+	*(volatile u32 *)PHYADJ1 = 0x80000022;
+	*(volatile u32 *)PHYADJ2 = 0x00009191;
+	*(volatile u32 *)PHYADJ1 = 0x80000024;
+
+	/* Disable Read Burst QSPI caching */
+	*(volatile u32 *)DRCR_0 = 0x00000000;
+	*(volatile u32 *)DRCR_0;	/* dummy read */
+
+	/* check was settings are good/bad */
+	for (i=0; i < 13; i++) {
+
+		/* Do a 'Read Cache Flush' before each read */
+		*(volatile u32 *)DRCR_0 = 0x00000200;
+		asm("nop");
+		*(volatile u32 *)DRCR_0;	/* Read must be done after cache flush */
+
+		/* Set our test values */
+		phycnt = *(volatile u32 *)PHYCNT & ~0x30000;	// clear CKSEL bits
+		*(volatile u32 *)PHYCNT = phycnt | ((u32)gs_spibsc_phy_adj[i].zz << 16);
+		*(volatile u32 *)PHYADJ2 = (u32)gs_spibsc_phy_adj[i].xy;
+		*(volatile u32 *)PHYADJ1 = 0x80000032;
+		*(volatile u32 *)PHYADJ1;	/* dummy read */
+
+		/* Read our test data */
+		test_value = *fixed_data_addr;
+
+		/* save the result */
+		results[i] = (test_value == TEST_VALUE);
+	}
+
+	/* print the results */
+	printf("Test results:\n");
+	for (i=0;i<13;i++)
+		printf("\t[%d] = %s\n", i, results[i]?"good":"bad");
+
+	/* Determine the best number (center value of good reads) */
+	index_start = 0;
+	for (i=0;i<13;i++)
+		if (results[i]) {
+			index_start = i;
+			break;
+		}
+	ok_cnt = 0;
+	for (i=index_start;i<13;i++)
+		if (results[i])
+			ok_cnt++;
+		else
+			break;
+
+        /* Calculate ok area center index */
+        if (3 < ok_cnt) {
+		tm_adj_index = (ok_cnt/2) + index_start;
+
+		printf("Adjustment index = %d\n", tm_adj_index);
+		printf("Set this number using 'qspi ddr_adj' before entering DDR mode\n");
+		printf("Example:\n\t=> qspi ddr_adj %d\n\t=> qspi single ddr a4 d4 ddr\n\n", tm_adj_index);
+	}
+	else {
+		printf("ERROR: Not enough good values to get center value.\n");
+		tm_adj_index = 7;
+	}
+
+	/* Set final value */
+	*(volatile u32 *)PHYCNT |= (u32)gs_spibsc_phy_adj[tm_adj_index].zz << 16;
+	*(volatile u32 *)PHYADJ2 = (u32)gs_spibsc_phy_adj[tm_adj_index].xy;
+	*(volatile u32 *)PHYADJ1 = 0x80000032;
+
+	return tm_adj_index;
+}
+#endif
+
 /* QUAD SPI MODE */
 int do_qspi(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
 {
@@ -509,15 +630,39 @@ int do_qspi(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
 	int i;
 	u8 cmd;
 	u8 dual_chip;
-	u8 quad_data;
-	u8 quad_addr;
+	u8 quad_data = 0;
+	u8 quad_addr = 0;
 	u8 ddr;
 	u32 dmdmcr, drenr, cmncr, drcmr, dropr, drdrenr;
 	const struct spi_flash_info *id;
+#ifdef CONFIG_RZA2
+	static u8 tm_adj_index = 7;	/* RZ/A2M EVB */
+#endif
 
 	/* need at least 1 argument (single/dual) */
 	if (argc < 2)
 		goto usage;
+
+#ifdef CONFIG_RZA2
+	/* DDR timing adjustment */
+	if (strcmp(argv[1], "ddr_adj") == 0)
+	{
+		if (strcmp(argv[2], NULL) != 0) {
+			tm_adj_index = simple_strtoul(argv[2], NULL, 10);
+			//printf("DDR index set to %d\n", tm_adj_index);
+			return 0;
+		}
+
+		/* check to make sure we are in DDR mode first */
+		if ((*(volatile u32 *)PHYCNT & 0x3) != 0x1) {
+			printf("\nERROR: Please put into DDR mode using qspi first before doing timing adjustment measurements.\n\n");
+			return 0;
+		}
+
+		tm_adj_index = timing_adj_calc();
+		return 0;
+	}
+#endif
 
 	if ( strcmp(argv[1], "single") == 0)
 		dual_chip = 0;
@@ -787,6 +932,22 @@ int do_qspi(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
 		*(volatile u32 *)PHYCNT = (*(volatile u32 *)PHYCNT & ~0x3) | 0x1;
 		/* PHYOFFSET1:DDRTMG = b'10 */
 		*(volatile u32 *)PHYOFFSET1 = (*(volatile u32 *)PHYOFFSET1 & ~0x30000000) | 0x2 << 28;
+
+		/* For DDR, sequence in Figure 20.28 */
+		/* Enable access to registers of the PHY module */
+		*(volatile u32 *)PHYADJ2 = 0xA5390000;
+		*(volatile u32 *)PHYADJ1 = 0x80000000;
+
+		/* Set PHY Timing Adjust Reg. */
+		*(volatile u32 *)PHYADJ2 = 0x00009191;
+		*(volatile u32 *)PHYADJ1 = 0x80000022;
+		*(volatile u32 *)PHYADJ2 = 0x00009191;
+		*(volatile u32 *)PHYADJ1 = 0x80000024;
+
+		/* Enter calculated values */
+		*(volatile u32 *)PHYCNT |= (u32)gs_spibsc_phy_adj[tm_adj_index].zz << 16;
+		*(volatile u32 *)PHYADJ2 = (u32)gs_spibsc_phy_adj[tm_adj_index].xy;
+		*(volatile u32 *)PHYADJ1 = 0x80000032;
 	}
 
 	/* Do some dummy reads (out of order) to help clean things up */
@@ -815,10 +976,21 @@ usage:
 }
 static char qspi_help_text[] =
 	"Set the XIP Mode for QSPI\n"
+#ifdef CONFIG_RZA2
+	"Usage: qspi [single|dual|ddr_adj] [a1|(a4)] [d1|(d4)] [(sdr)|ddr]\n"
+#else
 	"Usage: qspi [single|dual] [a1|(a4)] [d1|(d4)] [(sdr)|ddr]\n"
+#endif
 	"  (xx) means defualt value if not specified\n"
 	"  'a4' requries 'd4' to be set\n"
-	"  'ddr' requries 'd4' and 'a4' to be set\n";
+	"  'ddr' requries 'd4' and 'a4' to be set\n"
+#ifdef CONFIG_RZA2
+	"  'ddr_adj' (no argument) calculates the timing adjustment for DDR mode\n"
+	"  'ddr_adj ##' (with argument) sets the timing adjustment index for DDR mode\n";
+#else
+	"";
+#endif
+
 U_BOOT_CMD(
 	qspi,	CONFIG_SYS_MAXARGS,	1,	do_qspi,
 	"Change QSPI XIP Mode", qspi_help_text
