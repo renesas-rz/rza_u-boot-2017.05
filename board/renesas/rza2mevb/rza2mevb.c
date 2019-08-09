@@ -656,7 +656,7 @@ int board_late_init(void)
 	 * 1. Enable full XIP QSPI operation
 	 * 2. Copy Device Tree from QSPI to Internal RAM
 	 * 3. Boot XIP kernel */
-	setenv("xa_boot",	"qspi single ; "
+	setenv("xa_boot",	"qspi single a4 d4 ddr; "
 				"cp.b " DTB_ADDR_FLASH " " DTB_ADDR_RAM " 10000 ; "
 				"bootx " KERNEL_ADDR_FLASH " " DTB_ADDR_RAM);
 
@@ -665,7 +665,7 @@ int board_late_init(void)
 	 * 1. Enable full XIP QSPI operation
 	 * 2. Copy Device Tree from QSPI to SDRAM
 	 * 3. Boot XIP kernel */
-	setenv("xsa_boot",	"qspi single ; "
+	setenv("xsa_boot",	"qspi single a4 d4 ddr; "
 				"cp.b " DTB_ADDR_FLASH " " DTB_ADDR_SDRAM " 10000 ; "
 				"bootx " KERNEL_ADDR_FLASH " " DTB_ADDR_SDRAM);
 
@@ -674,7 +674,7 @@ int board_late_init(void)
 	 * 1. Enable full XIP QSPI operation
 	 * 2. Copy Device Tree from QSPI to HyperRAM
 	 * 3. Boot XIP kernel */
-	setenv("xha_boot",	"qspi single ; "
+	setenv("xha_boot",	"qspi single a4 d4 ddr; "
 				"cp.b " DTB_ADDR_FLASH " " DTB_ADDR_HYPRAM " 10000 ; "
 				"bootx " KERNEL_ADDR_FLASH " " DTB_ADDR_HYPRAM);
 
@@ -684,7 +684,7 @@ int board_late_init(void)
 	 * 2. Copy Device Tree from QSPI to SDRAM
 	 * 3. Copy uImage kernel from QSPI to SDRAM
 	 * 4. Decompress uImage and boot kernel */
-	setenv("u_boot",	"qspi single ; "
+	setenv("u_boot",	"qspi single a4 d4 ddr; "
 				"cp.b " DTB_ADDR_FLASH " " DTB_ADDR_SDRAM " 10000 ; "
 				"cp.b " KERNEL_ADDR_FLASH " " UIMAGE_ADDR_SDRAM " " UIMAGE_ADDR_SIZE " ; "
 				"bootm start " UIMAGE_ADDR_SDRAM " - " DTB_ADDR_SDRAM "; bootm loados ; bootm go");
